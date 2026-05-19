@@ -13,7 +13,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Center(
-          child: Text('F1 INVESTOR!'),
+          child: Text('F1 INVESTOR! mi rama'),
         ),
       ),
     );
