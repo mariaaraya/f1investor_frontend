@@ -1,6 +1,19 @@
 import 'package:flutter/material.dart';
 
-void main() {
+import 'datos/servicios/api_servicio.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final apiServicio = ApiServicio();
+
+  try {
+    final respuesta = await apiServicio.get('/');
+    debugPrint('Conexión backend exitosa: $respuesta');
+  } catch (error) {
+    debugPrint('Error conectando con backend: $error');
+  }
+
   runApp(const MainApp());
 }
 
