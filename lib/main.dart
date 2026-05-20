@@ -1,18 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'datos/servicios/api_servicio.dart';
+import 'infraestructura/dependencias/inyeccion_dependencias.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final apiServicio = ApiServicio();
-
-  try {
-    final respuesta = await apiServicio.get('/');
-    debugPrint('Conexión backend exitosa: $respuesta');
-  } catch (error) {
-    debugPrint('Error conectando con backend: $error');
-  }
+  await configurarDependencias();
 
   runApp(const MainApp());
 }

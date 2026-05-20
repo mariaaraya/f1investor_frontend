@@ -7,8 +7,10 @@ environment:
   sdk: ^3.11.3
 
 dependencies:
+  equatable: ^2.0.8
   flutter:
     sdk: flutter
+  get_it: ^9.2.1
   http: ^1.6.0
 
 dev_dependencies:

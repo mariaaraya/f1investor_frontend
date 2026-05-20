@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../../infraestructura/configuracion/api_config.dart';
+import '../../../infraestructura/configuracion/api_config.dart';
 
 class ApiServicio {
   ApiServicio();
