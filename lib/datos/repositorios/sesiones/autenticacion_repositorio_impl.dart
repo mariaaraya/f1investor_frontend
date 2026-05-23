@@ -28,20 +28,23 @@ class AutenticacionRepositorioImplementacion
   }
 
   @override
-  Future<ResultadoAutenticacion> registrarUsuario({
-    required String nombre,
-    required String correo,
-    required String password,
-  }) async {
-    final RegistroUsuarioSolicitudDto solicitud =
-        RegistroUsuarioSolicitudDto(
-      nombre: nombre,
-      correo: correo,
-      password: password,
-    );
+Future<ResultadoAutenticacion> registrarUsuario({
+  required String nombre,
+  required String correo,
+  required String password,
+  String? username,
+  double? capitalInicial,
+}) async {
+  final RegistroUsuarioSolicitudDto solicitud = RegistroUsuarioSolicitudDto(
+    nombre: nombre,
+    correo: correo,
+    password: password,
+    username: username,
+    capitalInicial: capitalInicial,
+  );
 
-    final respuesta = await _autenticacionServicio.registrarUsuario(solicitud);
+  final respuesta = await _autenticacionServicio.registrarUsuario(solicitud);
 
-    return respuesta.toEntity();
-  }
+  return respuesta.toEntity();
+}
 }

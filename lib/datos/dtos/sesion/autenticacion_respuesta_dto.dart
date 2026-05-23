@@ -1,4 +1,3 @@
-
 import '../../../dominio/entidades/entidades.dart';
 import '../dtos.dart';
 
@@ -17,7 +16,7 @@ class AutenticacionRespuestaDto {
 
   factory AutenticacionRespuestaDto.fromJson(Map<String, dynamic> json) {
     return AutenticacionRespuestaDto(
-      exitoso: json['exitoso'] as bool? ?? false,
+      exitoso: json['exitoso'] as bool? ?? true,
       mensaje: json['mensaje'] as String? ?? '',
       token: json['token'] as String? ?? '',
       usuario: UsuarioDto.fromJson(

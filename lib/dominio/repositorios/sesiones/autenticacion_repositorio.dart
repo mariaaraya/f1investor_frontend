@@ -1,4 +1,3 @@
-
 import '../../entidades/entidades.dart';
 
 abstract class AutenticacionRepositorio {
@@ -11,5 +10,7 @@ abstract class AutenticacionRepositorio {
     required String nombre,
     required String correo,
     required String password,
+    String? username,
+    double? capitalInicial,
   });
 }

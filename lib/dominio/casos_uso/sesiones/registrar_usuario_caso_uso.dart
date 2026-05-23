@@ -1,5 +1,6 @@
-import 'package:f1investor_frontend/dominio/repositorios/sesiones/autenticacion_repositorio.dart';
+
 import '../../entidades/entidades.dart';
+import '../../repositorios/sesiones/autenticacion_repositorio.dart';
 
 class RegistrarUsuarioCasoUso {
   RegistrarUsuarioCasoUso({
@@ -12,11 +13,15 @@ class RegistrarUsuarioCasoUso {
     required String nombre,
     required String correo,
     required String password,
+    String? username,
+    double? capitalInicial,
   }) {
     return _autenticacionRepositorio.registrarUsuario(
       nombre: nombre,
       correo: correo,
       password: password,
+      username: username,
+      capitalInicial: capitalInicial,
     );
   }
 }

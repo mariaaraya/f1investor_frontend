@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'infraestructura/dependencias/inyeccion_dependencias.dart';
+import 'presentacion/rutas/rutas.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,12 +16,15 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Center(
-          child: Text('F1 INVESTOR! mi rama'),
+      title: 'F1 Investor',
+      routerConfig: Rutas.router,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.red,
         ),
+        useMaterial3: true,
       ),
     );
   }
