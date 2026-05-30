@@ -15,8 +15,12 @@ class InicioSesionState extends Equatable {
   final String? mensajeError;
   final ResultadoAutenticacion? resultadoAutenticacion;
 
+  bool get correoValido {
+  return ValidadoresFormulario.correoValido(correo);
+  }
+
   bool get formularioValido {
-    return correo.trim().isNotEmpty && password.trim().isNotEmpty;
+  return correoValido && password.trim().isNotEmpty;
   }
 
   InicioSesionState copyWith({

@@ -27,10 +27,7 @@ class ApiServicio {
     return headers;
   }
 
-  Future<Map<String, dynamic>> get(
-    String endpoint, {
-    String? token,
-  }) async {
+  Future<Map<String, dynamic>> get(String endpoint, {String? token}) async {
     try {
       final response = await http
           .get(
@@ -64,8 +61,10 @@ class ApiServicio {
       return _procesarRespuesta(response);
     } on TimeoutException {
       throw Exception('Tiempo de espera agotado al conectar con el servidor');
-    } catch (error) {
-      throw Exception('Error de conexión con el servidor: $error');
+    } on FormatException {
+      throw Exception('La respuesta del servidor no tiene un formato válido');
+    } on http.ClientException {
+      throw Exception('No se pudo conectar con el servidor');
     }
   }
 
@@ -91,10 +90,7 @@ class ApiServicio {
     }
   }
 
-  Future<Map<String, dynamic>> delete(
-    String endpoint, {
-    String? token,
-  }) async {
+  Future<Map<String, dynamic>> delete(String endpoint, {String? token}) async {
     try {
       final response = await http
           .delete(
@@ -108,6 +104,30 @@ class ApiServicio {
       throw Exception('Tiempo de espera agotado al conectar con el servidor');
     } catch (error) {
       throw Exception('Error de conexión con el servidor: $error');
+    }
+  }
+
+  Future<Map<String, dynamic>> patch(
+    String endpoint, {
+    Map<String, dynamic>? body,
+    String? token,
+  }) async {
+    try {
+      final response = await http
+          .patch(
+            _construirUrl(endpoint),
+            headers: _construirHeaders(token: token),
+            body: jsonEncode(body ?? {}),
+          )
+          .timeout(ApiConfig.connectTimeout);
+
+      return _procesarRespuesta(response);
+    } on TimeoutException {
+      throw Exception('Tiempo de espera agotado al conectar con el servidor');
+    } on FormatException {
+      throw Exception('La respuesta del servidor no tiene un formato válido');
+    } on http.ClientException {
+      throw Exception('No se pudo conectar con el servidor');
     }
   }
 

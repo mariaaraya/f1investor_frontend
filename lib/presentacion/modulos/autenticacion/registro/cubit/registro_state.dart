@@ -19,14 +19,22 @@ class RegistroState extends Equatable {
   final String? mensajeError;
   final String? mensajeExito;
 
+  bool get correoValido {
+    return ValidadoresFormulario.correoValido(correo);
+  }
+
+  bool get passwordValida {
+    return ValidadoresFormulario.passwordFuerte(password);
+  }
+
   bool get passwordsCoinciden {
     return password == confirmarPassword;
   }
 
   bool get formularioValido {
     return nombre.trim().isNotEmpty &&
-        correo.trim().isNotEmpty &&
-        password.trim().isNotEmpty &&
+        correoValido &&
+        passwordValida &&
         confirmarPassword.trim().isNotEmpty &&
         passwordsCoinciden;
   }

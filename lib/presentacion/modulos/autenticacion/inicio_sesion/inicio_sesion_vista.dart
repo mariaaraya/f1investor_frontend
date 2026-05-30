@@ -1,3 +1,5 @@
+import 'package:f1investor_frontend/presentacion/comun/dialogos/dialogo_mensaje.dart';
+import 'package:f1investor_frontend/presentacion/modulos/autenticacion/recuperar_password/recuperar_password_vista.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -16,7 +18,7 @@ class InicioSesionVista extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<InicioSesionCubit, InicioSesionState>(
-      listener: (BuildContext context, InicioSesionState state) {
+      listener: (BuildContext context, InicioSesionState state) async {
         final ResultadoAutenticacion? resultado = state.resultadoAutenticacion;
 
         if (resultado != null) {
@@ -24,11 +26,12 @@ class InicioSesionVista extends StatelessWidget {
         }
 
         if (state.mensajeError != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.mensajeError!),
-              backgroundColor: Colors.red,
-            ),
+          await mostrarDialogoMensaje(
+            context: context,
+            titulo: 'No se pudo iniciar sesión',
+            mensaje: state.mensajeError!,
+            icono: Icons.error_outline,
+            colorIcono: const Color(0xFFE60000),
           );
         }
       },
@@ -127,10 +130,14 @@ class _ContenidoInicioSesion extends StatelessWidget {
                   ),
                   const SizedBox(height: 58),
                   TextButton(
-                    onPressed: state.cargando ? null : () {},
+                    onPressed: state.cargando
+                        ? null
+                        : () {
+                            context.goNamed(RecuperarPasswordVista.nombre);
+                          },
                     child: const Text(
                       '¿Olvidaste tu contraseña?',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      style: TextStyle(color: Colors.white, fontSize: 15),
                     ),
                   ),
                   const SizedBox(height: 28),

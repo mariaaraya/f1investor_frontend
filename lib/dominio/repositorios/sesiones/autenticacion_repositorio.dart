@@ -13,4 +13,9 @@ abstract class AutenticacionRepositorio {
     String? username,
     double? capitalInicial,
   });
+
+  Future<String> recuperarPassword({
+    required String correo,
+    required String nuevoPassword,
+  });
 }

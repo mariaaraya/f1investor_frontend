@@ -30,4 +30,15 @@ class AutenticacionServicio {
 
     return AutenticacionRespuestaDto.fromJson(respuesta);
   }
+
+  Future<RecuperarPasswordRespuestaDto> recuperarPassword(
+  RecuperarPasswordSolicitudDto solicitud,
+) async {
+  final Map<String, dynamic> respuesta = await _apiServicio.patch(
+    '/api/usuarios/recuperar-password',
+    body: solicitud.toJson(),
+  );
+
+  return RecuperarPasswordRespuestaDto.fromJson(respuesta);
+}
 }

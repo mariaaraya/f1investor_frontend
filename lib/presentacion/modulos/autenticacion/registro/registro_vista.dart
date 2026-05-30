@@ -1,3 +1,4 @@
+import 'package:f1investor_frontend/presentacion/comun/dialogos/dialogo_mensaje.dart';
 import 'package:f1investor_frontend/presentacion/modulos/autenticacion/registro/cubit/registro_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,25 +15,29 @@ class RegistroVista extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<RegistroCubit, RegistroState>(
-      listener: (BuildContext context, RegistroState state) {
+      listener: (BuildContext context, RegistroState state) async {
         if (state.mensajeError != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.mensajeError!),
-              backgroundColor: Colors.red,
-            ),
+          await mostrarDialogoMensaje(
+            context: context,
+            titulo: 'No se pudo registrar',
+            mensaje: state.mensajeError!,
+            icono: Icons.error_outline,
+            colorIcono: const Color(0xFFE60000),
           );
         }
 
         if (state.mensajeExito != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.mensajeExito!),
-              backgroundColor: Colors.green,
-            ),
+          await mostrarDialogoMensaje(
+            context: context,
+            titulo: 'Registro exitoso',
+            mensaje: state.mensajeExito!,
+            icono: Icons.check_circle_outline,
+            colorIcono: Colors.green,
           );
 
-          context.goNamed(InicioSesionVista.nombre);
+          if (context.mounted) {
+            context.goNamed(InicioSesionVista.nombre);
+          }
         }
       },
       builder: (BuildContext context, RegistroState state) {
@@ -109,6 +114,15 @@ class _ContenidoRegistro extends StatelessWidget {
                     hint: '••••••••',
                     obscureText: true,
                     onChanged: context.read<RegistroCubit>().actualizarPassword,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.',
+                    style: TextStyle(
+                      color: Color(0xFFBDBDBD),
+                      fontSize: 12,
+                      height: 1.3,
+                    ),
                   ),
                   const SizedBox(height: 22),
                   _CampoRegistro(
