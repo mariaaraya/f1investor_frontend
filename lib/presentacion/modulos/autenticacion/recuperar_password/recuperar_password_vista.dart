@@ -7,10 +7,24 @@ import 'package:go_router/go_router.dart';
 import '../inicio_sesion/inicio_sesion_vista.dart';
 
 class RecuperarPasswordVista extends StatelessWidget {
-  const RecuperarPasswordVista({super.key});
+  const RecuperarPasswordVista({
+    super.key,
+    this.vieneDesdePerfil = false,
+  });
+
+  final bool vieneDesdePerfil;
 
   static const String nombre = 'recuperarPassword';
   static const String ruta = '/recuperar-password';
+
+  void _volver(BuildContext context) {
+    if (vieneDesdePerfil && context.canPop()) {
+      context.pop();
+      return;
+    }
+
+    context.goNamed(InicioSesionVista.nombre);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,24 +50,36 @@ class RecuperarPasswordVista extends StatelessWidget {
           );
 
           if (context.mounted) {
-            context.goNamed(InicioSesionVista.nombre);
+            _volver(context);
           }
         }
       },
       builder: (BuildContext context, RecuperarPasswordState state) {
-        return const _ContenidoRecuperarPassword();
+        return _ContenidoRecuperarPassword(
+          vieneDesdePerfil: vieneDesdePerfil,
+          onVolver: () {
+            _volver(context);
+          },
+        );
       },
     );
   }
 }
 
 class _ContenidoRecuperarPassword extends StatelessWidget {
-  const _ContenidoRecuperarPassword();
+  const _ContenidoRecuperarPassword({
+    required this.vieneDesdePerfil,
+    required this.onVolver,
+  });
+
+  final bool vieneDesdePerfil;
+  final VoidCallback onVolver;
 
   @override
   Widget build(BuildContext context) {
-    final RecuperarPasswordState state =
-        context.watch<RecuperarPasswordCubit>().state;
+    final RecuperarPasswordState state = context
+        .watch<RecuperarPasswordCubit>()
+        .state;
 
     return Scaffold(
       backgroundColor: const Color(0xFF080808),
@@ -70,11 +96,7 @@ class _ContenidoRecuperarPassword extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: IconButton(
-                      onPressed: state.cargando
-                          ? null
-                          : () {
-                              context.goNamed(InicioSesionVista.nombre);
-                            },
+                      onPressed: state.cargando ? null : onVolver,
                       icon: const Icon(Icons.arrow_back, color: Colors.white70),
                     ),
                   ),
@@ -176,14 +198,15 @@ class _ContenidoRecuperarPassword extends StatelessWidget {
                   ),
                   const SizedBox(height: 34),
                   TextButton(
-                    onPressed: state.cargando
-                        ? null
-                        : () {
-                            context.goNamed(InicioSesionVista.nombre);
-                          },
-                    child: const Text(
-                      'Volver al inicio de sesión',
-                      style: TextStyle(color: Colors.white, fontSize: 15),
+                    onPressed: state.cargando ? null : onVolver,
+                    child: Text(
+                      vieneDesdePerfil
+                          ? 'Volver al perfil'
+                          : 'Volver al inicio de sesión',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 50),

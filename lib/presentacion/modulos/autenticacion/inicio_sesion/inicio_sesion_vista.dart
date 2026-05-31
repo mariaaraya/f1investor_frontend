@@ -23,7 +23,7 @@ class InicioSesionVista extends StatelessWidget {
         final ResultadoAutenticacion? resultado = state.resultadoAutenticacion;
 
         if (resultado != null) {
-          context.goNamed(PrincipalVista.nombre);
+          context.goNamed(PrincipalVista.nombre, extra: resultado);
         }
 
         if (state.mensajeError != null) {
@@ -247,10 +247,7 @@ class _CampoInicioSesionState extends State<_CampoInicioSesion> {
           cursorColor: const Color(0xFFE60000),
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: const TextStyle(
-              color: Color(0xFF9E9E9E),
-              fontSize: 14,
-            ),
+            hintStyle: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 14),
             filled: true,
             fillColor: const Color(0xFF1C1C1C),
             contentPadding: const EdgeInsets.symmetric(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../dominio/entidades/entidades.dart';
 import 'cartera/carerta_vista.dart';
 import 'inicio/inicio_vista.dart';
 import 'mercado/mercado_vista.dart';
@@ -7,10 +8,15 @@ import 'resultados/resultados_vista.dart';
 import 'perfil/perfil_vista.dart';
 
 class PrincipalVista extends StatefulWidget {
-  const PrincipalVista({super.key});
+  const PrincipalVista({
+    super.key,
+    required this.resultadoAutenticacion,
+  });
 
   static const String nombre = 'principal';
   static const String ruta = '/principal';
+
+  final ResultadoAutenticacion resultadoAutenticacion;
 
   @override
   State<PrincipalVista> createState() => _PrincipalVistaState();
@@ -19,12 +25,14 @@ class PrincipalVista extends StatefulWidget {
 class _PrincipalVistaState extends State<PrincipalVista> {
   int _indiceSeleccionado = 0;
 
-  final List<Widget> _vistas = const <Widget>[
-    InicioVista(),
-    MercadoVista(),
-    CarteraVista(),
-    ResultadosVista(),
-    PerfilVista(),
+  late final List<Widget> _vistas = <Widget>[
+    const InicioVista(),
+    const MercadoVista(),
+    const CarteraVista(),
+    const ResultadosVista(),
+    PerfilVista(
+      resultadoAutenticacion: widget.resultadoAutenticacion,
+    ),
   ];
 
   void _cambiarVista(int indice) {
