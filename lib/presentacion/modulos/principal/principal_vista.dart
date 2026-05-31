@@ -8,10 +8,7 @@ import 'resultados/resultados_vista.dart';
 import 'perfil/perfil_vista.dart';
 
 class PrincipalVista extends StatefulWidget {
-  const PrincipalVista({
-    super.key,
-    required this.resultadoAutenticacion,
-  });
+  const PrincipalVista({super.key, required this.resultadoAutenticacion});
 
   static const String nombre = 'principal';
   static const String ruta = '/principal';
@@ -26,13 +23,11 @@ class _PrincipalVistaState extends State<PrincipalVista> {
   int _indiceSeleccionado = 0;
 
   late final List<Widget> _vistas = <Widget>[
-    const InicioVista(),
+    InicioVista(resultadoAutenticacion: widget.resultadoAutenticacion),
     const MercadoVista(),
     const CarteraVista(),
     const ResultadosVista(),
-    PerfilVista(
-      resultadoAutenticacion: widget.resultadoAutenticacion,
-    ),
+    PerfilVista(resultadoAutenticacion: widget.resultadoAutenticacion),
   ];
 
   void _cambiarVista(int indice) {
@@ -44,10 +39,7 @@ class _PrincipalVistaState extends State<PrincipalVista> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _indiceSeleccionado,
-        children: _vistas,
-      ),
+      body: IndexedStack(index: _indiceSeleccionado, children: _vistas),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _indiceSeleccionado,
         onTap: _cambiarVista,
