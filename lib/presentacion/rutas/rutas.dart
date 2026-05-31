@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../dominio/casos_uso/sesiones/iniciar_sesion_caso_uso.dart';
 import '../../dominio/casos_uso/sesiones/recuperar_password_caso_uso.dart';
 import '../../dominio/casos_uso/sesiones/registrar_usuario_caso_uso.dart';
-import '../../dominio/entidades/entidades.dart';
 import '../../infraestructura/dependencias/inyeccion_dependencias.dart';
 import '../modulos/autenticacion/inicio_sesion/cubit/inicio_sesion_cubit.dart';
 import '../modulos/autenticacion/inicio_sesion/inicio_sesion_vista.dart';
@@ -13,7 +12,7 @@ import '../modulos/autenticacion/recuperar_password/cubit/recuperar_password_cub
 import '../modulos/autenticacion/recuperar_password/recuperar_password_vista.dart';
 import '../modulos/autenticacion/registro/cubit/registro_cubit.dart';
 import '../modulos/autenticacion/registro/registro_vista.dart';
-import '../modulos/inicio/inicio_vista.dart';
+import '../modulos/principal/principal_vista.dart';
 
 class Rutas {
   Rutas._();
@@ -58,23 +57,10 @@ class Rutas {
         },
       ),
       GoRoute(
-        name: InicioVista.nombre,
-        path: InicioVista.ruta,
+        name: PrincipalVista.nombre,
+        path: PrincipalVista.ruta,
         builder: (BuildContext context, GoRouterState state) {
-          final Object? extra = state.extra;
-
-          if (extra is! ResultadoAutenticacion) {
-            return BlocProvider<InicioSesionCubit>(
-              create: (_) => InicioSesionCubit(
-                iniciarSesionCasoUso: sl<IniciarSesionCasoUso>(),
-              ),
-              child: const InicioSesionVista(),
-            );
-          }
-
-          return InicioVista(
-            resultadoAutenticacion: extra,
-          );
+          return const PrincipalVista();
         },
       ),
     ],

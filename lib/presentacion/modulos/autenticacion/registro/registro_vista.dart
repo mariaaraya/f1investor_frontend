@@ -220,7 +220,7 @@ class _LogoRegistro extends StatelessWidget {
   }
 }
 
-class _CampoRegistro extends StatelessWidget {
+class _CampoRegistro extends StatefulWidget {
   const _CampoRegistro({
     required this.etiqueta,
     required this.hint,
@@ -236,12 +236,27 @@ class _CampoRegistro extends StatelessWidget {
   final TextInputType? tipoTeclado;
 
   @override
+  State<_CampoRegistro> createState() => _CampoRegistroState();
+}
+
+class _CampoRegistroState extends State<_CampoRegistro> {
+  bool _mostrarTexto = false;
+
+  void _cambiarVisibilidad() {
+    setState(() {
+      _mostrarTexto = !_mostrarTexto;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final bool ocultarTexto = widget.obscureText && !_mostrarTexto;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          etiqueta,
+          widget.etiqueta,
           style: const TextStyle(
             color: Colors.white,
             fontSize: 13,
@@ -250,20 +265,34 @@ class _CampoRegistro extends StatelessWidget {
         ),
         const SizedBox(height: 7),
         TextField(
-          onChanged: onChanged,
-          obscureText: obscureText,
-          keyboardType: tipoTeclado,
+          onChanged: widget.onChanged,
+          obscureText: ocultarTexto,
+          keyboardType: widget.tipoTeclado,
           style: const TextStyle(color: Colors.white, fontSize: 14),
           cursorColor: const Color(0xFFE60000),
           decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 14),
+            hintText: widget.hint,
+            hintStyle: const TextStyle(
+              color: Color(0xFF9E9E9E),
+              fontSize: 14,
+            ),
             filled: true,
             fillColor: const Color(0xFF1C1C1C),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 15,
             ),
+            suffixIcon: widget.obscureText
+                ? IconButton(
+                    onPressed: _cambiarVisibilidad,
+                    icon: Icon(
+                      _mostrarTexto
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      color: Colors.white70,
+                    ),
+                  )
+                : null,
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(7),
               borderSide: const BorderSide(color: Color(0xFF333333)),

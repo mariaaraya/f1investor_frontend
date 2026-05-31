@@ -5,7 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../dominio/entidades/entidades.dart';
-import '../../inicio/inicio_vista.dart';
+import '../../principal/inicio/inicio_vista.dart';
+import '../../principal/principal_vista.dart';
 import '../registro/registro_vista.dart';
 import 'cubit/inicio_sesion_cubit.dart';
 
@@ -22,7 +23,7 @@ class InicioSesionVista extends StatelessWidget {
         final ResultadoAutenticacion? resultado = state.resultadoAutenticacion;
 
         if (resultado != null) {
-          context.goNamed(InicioVista.nombre, extra: resultado);
+          context.goNamed(PrincipalVista.nombre);
         }
 
         if (state.mensajeError != null) {
@@ -194,7 +195,7 @@ class _LogoInicioSesion extends StatelessWidget {
   }
 }
 
-class _CampoInicioSesion extends StatelessWidget {
+class _CampoInicioSesion extends StatefulWidget {
   const _CampoInicioSesion({
     required this.etiqueta,
     required this.hint,
@@ -210,12 +211,27 @@ class _CampoInicioSesion extends StatelessWidget {
   final ValueChanged<String> onChanged;
 
   @override
+  State<_CampoInicioSesion> createState() => _CampoInicioSesionState();
+}
+
+class _CampoInicioSesionState extends State<_CampoInicioSesion> {
+  bool _mostrarTexto = false;
+
+  void _cambiarVisibilidad() {
+    setState(() {
+      _mostrarTexto = !_mostrarTexto;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final bool ocultarTexto = widget.obscureText && !_mostrarTexto;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          etiqueta,
+          widget.etiqueta,
           style: const TextStyle(
             color: Colors.white,
             fontSize: 13,
@@ -224,20 +240,34 @@ class _CampoInicioSesion extends StatelessWidget {
         ),
         const SizedBox(height: 7),
         TextField(
-          onChanged: onChanged,
-          obscureText: obscureText,
-          keyboardType: tipoTeclado,
+          onChanged: widget.onChanged,
+          obscureText: ocultarTexto,
+          keyboardType: widget.tipoTeclado,
           style: const TextStyle(color: Colors.white, fontSize: 14),
           cursorColor: const Color(0xFFE60000),
           decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 14),
+            hintText: widget.hint,
+            hintStyle: const TextStyle(
+              color: Color(0xFF9E9E9E),
+              fontSize: 14,
+            ),
             filled: true,
             fillColor: const Color(0xFF1C1C1C),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 15,
             ),
+            suffixIcon: widget.obscureText
+                ? IconButton(
+                    onPressed: _cambiarVisibilidad,
+                    icon: Icon(
+                      _mostrarTexto
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      color: Colors.white70,
+                    ),
+                  )
+                : null,
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(7),
               borderSide: const BorderSide(color: Color(0xFF333333)),
