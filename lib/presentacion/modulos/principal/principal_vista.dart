@@ -4,6 +4,7 @@ import '../../../dominio/entidades/entidades.dart';
 import 'cartera/carerta_vista.dart';
 import 'inicio/inicio_vista.dart';
 import 'mercado/mercado_vista.dart';
+import 'mercado/resultado_compra_mercado.dart';
 import 'resultados/resultados_vista.dart';
 import 'perfil/perfil_vista.dart';
 
@@ -22,13 +23,13 @@ class PrincipalVista extends StatefulWidget {
 class _PrincipalVistaState extends State<PrincipalVista> {
   int _indiceSeleccionado = 0;
 
-  late final List<Widget> _vistas = <Widget>[
-    InicioVista(resultadoAutenticacion: widget.resultadoAutenticacion),
-    const MercadoVista(),
-    const CarteraVista(),
-    const ResultadosVista(),
-    PerfilVista(resultadoAutenticacion: widget.resultadoAutenticacion),
-  ];
+  late ResultadoAutenticacion _resultadoAutenticacion;
+
+  @override
+  void initState() {
+    super.initState();
+    _resultadoAutenticacion = widget.resultadoAutenticacion;
+  }
 
   void _cambiarVista(int indice) {
     setState(() {
@@ -36,10 +37,55 @@ class _PrincipalVistaState extends State<PrincipalVista> {
     });
   }
 
+  void _actualizarUsuarioPorCompra(ResultadoCompraMercado resultadoCompra) {
+    final Usuario usuarioActual = _resultadoAutenticacion.usuario;
+
+    final double nuevoValorCartera =
+        usuarioActual.valorPortfolio + resultadoCompra.totalCompra;
+
+    final double nuevoPatrimonioTotal =
+        resultadoCompra.capitalRestante + nuevoValorCartera;
+
+    final Usuario usuarioActualizado = Usuario(
+      id: usuarioActual.id,
+      nombre: usuarioActual.nombre,
+      username: usuarioActual.username,
+      correo: usuarioActual.correo,
+      capitalInicial: usuarioActual.capitalInicial,
+      capital: resultadoCompra.capitalRestante,
+      valorPortfolio: nuevoValorCartera,
+      patrimonioTotal: nuevoPatrimonioTotal,
+      rol: usuarioActual.rol,
+      activo: usuarioActual.activo,
+      creadoEn: usuarioActual.creadoEn,
+      ultimoAcceso: usuarioActual.ultimoAcceso,
+    );
+
+    setState(() {
+      _resultadoAutenticacion = ResultadoAutenticacion(
+        exitoso: _resultadoAutenticacion.exitoso,
+        mensaje: _resultadoAutenticacion.mensaje,
+        token: _resultadoAutenticacion.token,
+        usuario: usuarioActualizado,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final List<Widget> vistas = <Widget>[
+      InicioVista(resultadoAutenticacion: _resultadoAutenticacion),
+      MercadoVista(
+        resultadoAutenticacion: _resultadoAutenticacion,
+        onCompraRealizada: _actualizarUsuarioPorCompra,
+      ),
+      const CarteraVista(),
+      const ResultadosVista(),
+      PerfilVista(resultadoAutenticacion: _resultadoAutenticacion),
+    ];
+
     return Scaffold(
-      body: IndexedStack(index: _indiceSeleccionado, children: _vistas),
+      body: IndexedStack(index: _indiceSeleccionado, children: vistas),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _indiceSeleccionado,
         onTap: _cambiarVista,

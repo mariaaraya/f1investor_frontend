@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../dominio/entidades/entidades.dart';
-import '../../principal/inicio/inicio_vista.dart';
 import '../../principal/principal_vista.dart';
 import '../registro/registro_vista.dart';
 import 'cubit/inicio_sesion_cubit.dart';

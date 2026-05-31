@@ -1,3 +1,6 @@
+import 'package:f1investor_frontend/presentacion/modulos/principal/mercado/argumentos_activo_mercado.dart';
+import 'package:f1investor_frontend/presentacion/modulos/principal/mercado/compra/compra_activo_mercado_vista.dart';
+import 'package:f1investor_frontend/presentacion/modulos/principal/mercado/detalle/detalle_activo_mercado_vista.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -75,6 +78,40 @@ class Rutas {
           }
 
           return PrincipalVista(resultadoAutenticacion: extra);
+        },
+      ),
+      GoRoute(
+        name: DetalleActivoMercadoVista.nombre,
+        path: DetalleActivoMercadoVista.ruta,
+        builder: (BuildContext context, GoRouterState state) {
+          final Object? extra = state.extra;
+
+          if (extra is! ArgumentosActivoMercado) {
+            return const Scaffold(
+              body: Center(
+                child: Text('No se encontró el activo seleccionado'),
+              ),
+            );
+          }
+
+          return DetalleActivoMercadoVista(argumentos: extra);
+        },
+      ),
+      GoRoute(
+        name: CompraActivoMercadoVista.nombre,
+        path: CompraActivoMercadoVista.ruta,
+        builder: (BuildContext context, GoRouterState state) {
+          final Object? extra = state.extra;
+
+          if (extra is! ArgumentosActivoMercado) {
+            return const Scaffold(
+              body: Center(
+                child: Text('No se encontró el activo seleccionado'),
+              ),
+            );
+          }
+
+          return CompraActivoMercadoVista(argumentos: extra);
         },
       ),
     ],

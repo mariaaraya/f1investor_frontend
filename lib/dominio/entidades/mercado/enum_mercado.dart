@@ -1,0 +1,4 @@
+enum TipoActivoMercado {
+  piloto,
+  equipo,
+}
