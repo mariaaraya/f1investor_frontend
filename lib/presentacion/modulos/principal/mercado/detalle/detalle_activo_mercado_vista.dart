@@ -266,7 +266,7 @@ class _ListaHistorialMercado extends StatelessWidget {
 
     return ListView.separated(
       itemCount: historial.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
       itemBuilder: (BuildContext context, int index) {
         final HistorialMercado item = historial[index];
         final bool positivo = item.porcentajeVariacion >= 0;

@@ -1,4 +1,9 @@
+import 'package:f1investor_frontend/dominio/casos_uso/cartera/obtener_cartera_caso_uso.dart';
+import 'package:f1investor_frontend/dominio/casos_uso/cartera/vender_activo_caso_uso.dart';
+import 'package:f1investor_frontend/infraestructura/dependencias/inyeccion_dependencias.dart';
+import 'package:f1investor_frontend/presentacion/modulos/principal/cartera/cubit/cartera_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../dominio/entidades/entidades.dart';
 import 'cartera/carerta_vista.dart';
@@ -79,7 +84,13 @@ class _PrincipalVistaState extends State<PrincipalVista> {
         resultadoAutenticacion: _resultadoAutenticacion,
         onCompraRealizada: _actualizarUsuarioPorCompra,
       ),
-      const CarteraVista(),
+      BlocProvider<CarteraCubit>(
+        create: (_) => CarteraCubit(
+          obtenerCarteraCasoUso: sl<ObtenerCarteraCasoUso>(),
+          venderActivoCasoUso: sl<VenderActivoCasoUso>(),
+        )..cargarCartera(token: _resultadoAutenticacion.token),
+        child: CarteraVista(resultadoAutenticacion: _resultadoAutenticacion),
+      ),
       const ResultadosVista(),
       PerfilVista(resultadoAutenticacion: _resultadoAutenticacion),
     ];

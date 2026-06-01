@@ -161,7 +161,7 @@ class _ContenidoMercado extends StatelessWidget {
       onRefresh: () async => onReintentar(),
       child: ListView.separated(
         itemCount: activos.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (BuildContext context, int index) {
           return _CardActivoMercado(
             activo: activos[index],

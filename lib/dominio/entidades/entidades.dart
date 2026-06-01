@@ -8,3 +8,7 @@ export 'package:f1investor_frontend/dominio/entidades/mercado/activo_mercado.dar
 export 'package:f1investor_frontend/dominio/entidades/mercado/mercado_respuesta.dart';
 export 'package:f1investor_frontend/dominio/entidades/mercado/historial_mercado.dart';
 export 'package:f1investor_frontend/dominio/entidades/mercado/compra_activo_respuesta.dart';
+
+//Cartera
+export 'package:f1investor_frontend/dominio/entidades/cartera/item_cartera.dart';
+export 'package:f1investor_frontend/dominio/entidades/cartera/cartera.dart';

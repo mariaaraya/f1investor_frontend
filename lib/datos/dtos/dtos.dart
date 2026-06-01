@@ -12,3 +12,9 @@ export 'package:f1investor_frontend/datos/dtos/mercado/mercado_respuesta_dto.dar
 export 'package:f1investor_frontend/datos/dtos/mercado/historial_mercado_dto.dart';
 export 'package:f1investor_frontend/datos/dtos/mercado/compra_activo_solicitud_dto.dart';
 export 'package:f1investor_frontend/datos/dtos/mercado/compra_activo_respuesta_dto.dart';
+
+//Cartera
+export 'package:f1investor_frontend/datos/dtos/cartera/item_cartera_dto.dart';
+export 'package:f1investor_frontend/datos/dtos/cartera/cartera_dto.dart';
+export 'package:f1investor_frontend/datos/dtos/cartera/vender_activo_solicitud_dto.dart';
+export 'package:f1investor_frontend/datos/dtos/cartera/vender_activo_respuesta_dto.dart'; 
