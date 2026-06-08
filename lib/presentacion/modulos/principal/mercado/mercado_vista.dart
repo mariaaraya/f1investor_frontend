@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../dominio/casos_uso/mercado/consultar_mercado_caso_uso.dart';
 import '../../../../dominio/entidades/entidades.dart';
 import '../../../../infraestructura/dependencias/inyeccion_dependencias.dart';
+import '../../../../infraestructura/extenciones/contexto_extensiones.dart';
 import 'cubit/mercado_cubit.dart';
 import 'detalle/detalle_activo_mercado_vista.dart';
 
@@ -40,54 +41,57 @@ class _MercadoVistaState extends State<MercadoVista> {
               ? state.equipos
               : state.pilotos;
 
-          return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const Text(
-                    'Mercado',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+          return ColoredBox(
+            color: context.colorFondo,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'Mercado',
+                      style: TextStyle(
+                        color: context.colorTextoPrincipal,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Activos disponibles para inversión',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                  const SizedBox(height: 22),
-
-                  _SelectorMercado(
-                    mostrandoEscuderias: mostrandoEscuderias,
-                    onCambiar: (bool escuderiasSeleccionadas) {
-                      setState(() {
-                        mostrandoEscuderias = escuderiasSeleccionadas;
-                      });
-                    },
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  Expanded(
-                    child: _ContenidoMercado(
-                      cargando: state.cargando,
-                      mensajeError: state.mensajeError,
-                      activos: activos,
+                    const SizedBox(height: 6),
+                    Text(
+                      'Activos disponibles para inversión',
+                      style: TextStyle(
+                        color: context.colorTextoSecundario,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 22),
+                    _SelectorMercado(
                       mostrandoEscuderias: mostrandoEscuderias,
-                      resultadoAutenticacion: widget.resultadoAutenticacion,
-                      onCompraRealizada: widget.onCompraRealizada,
-                      onReintentar: () {
-                        context.read<MercadoCubit>().cargarMercado(
-                              token: widget.resultadoAutenticacion.token,
-                            );
+                      onCambiar: (bool escuderiasSeleccionadas) {
+                        setState(() {
+                          mostrandoEscuderias = escuderiasSeleccionadas;
+                        });
                       },
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: _ContenidoMercado(
+                        cargando: state.cargando,
+                        mensajeError: state.mensajeError,
+                        activos: activos,
+                        mostrandoEscuderias: mostrandoEscuderias,
+                        resultadoAutenticacion: widget.resultadoAutenticacion,
+                        onCompraRealizada: widget.onCompraRealizada,
+                        onReintentar: () {
+                          context.read<MercadoCubit>().cargarMercado(
+                                token: widget.resultadoAutenticacion.token,
+                              );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -119,7 +123,11 @@ class _ContenidoMercado extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (cargando && activos.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(
+          color: context.colorPrimarioApp,
+        ),
+      );
     }
 
     if (mensajeError != null && activos.isEmpty) {
@@ -127,18 +135,25 @@ class _ContenidoMercado extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            const Icon(Icons.error_outline, color: Colors.redAccent, size: 34),
+            const Icon(
+              Icons.error_outline,
+              color: Colors.redAccent,
+              size: 34,
+            ),
             const SizedBox(height: 10),
             Text(
               mensajeError!,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white70, fontSize: 13),
+              style: TextStyle(
+                color: context.colorTextoSecundario,
+                fontSize: 13,
+              ),
             ),
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: onReintentar,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: context.colorPrimarioApp,
                 foregroundColor: Colors.white,
               ),
               child: const Text('Reintentar'),
@@ -149,10 +164,13 @@ class _ContenidoMercado extends StatelessWidget {
     }
 
     if (activos.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'No hay activos disponibles.',
-          style: TextStyle(color: Colors.white70, fontSize: 13),
+          style: TextStyle(
+            color: context.colorTextoSecundario,
+            fontSize: 13,
+          ),
         ),
       );
     }
@@ -190,9 +208,9 @@ class _SelectorMercado extends StatelessWidget {
       height: 40,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B1B1B),
+        color: context.colorTarjeta,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: context.colorBorde),
       ),
       child: Row(
         children: <Widget>[
@@ -238,7 +256,7 @@ class _BotonSelectorMercado extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: seleccionado ? Colors.red : Colors.transparent,
+          color: seleccionado ? context.colorPrimarioApp : Colors.transparent,
           borderRadius: BorderRadius.circular(5),
         ),
         child: Center(
@@ -248,13 +266,17 @@ class _BotonSelectorMercado extends StatelessWidget {
               Icon(
                 icono,
                 size: 15,
-                color: seleccionado ? Colors.white : Colors.white70,
+                color: seleccionado
+                    ? Colors.white
+                    : context.colorTextoSecundario,
               ),
               const SizedBox(width: 6),
               Text(
                 texto,
                 style: TextStyle(
-                  color: seleccionado ? Colors.white : Colors.white70,
+                  color: seleccionado
+                      ? Colors.white
+                      : context.colorTextoSecundario,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
@@ -295,14 +317,15 @@ class _CardActivoMercado extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool variacionPositiva = activo.porcentajeVariacion >= 0;
+    final bool variacionPositiva = activo.porcentajeVariacion > 0;
+    final bool mostrarVariacion = activo.porcentajeVariacion != 0;
 
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B1B1B),
+        color: context.colorTarjeta,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: context.colorBorde),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -317,8 +340,8 @@ class _CardActivoMercado extends StatelessWidget {
                   activo.nombre,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.colorTextoPrincipal,
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                   ),
@@ -326,8 +349,8 @@ class _CardActivoMercado extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   _obtenerDetalleActivo(activo),
-                  style: const TextStyle(
-                    color: Colors.white70,
+                  style: TextStyle(
+                    color: context.colorTextoSecundario,
                     fontSize: 11,
                     height: 1.35,
                   ),
@@ -341,42 +364,45 @@ class _CardActivoMercado extends StatelessWidget {
                         children: <Widget>[
                           Text(
                             '\$${activo.valorMercado.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: context.colorTextoPrincipal,
                               fontSize: 20,
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          Row(
-                            children: <Widget>[
-                              Icon(
-                                variacionPositiva
-                                    ? Icons.trending_up
-                                    : Icons.trending_down,
-                                size: 14,
-                                color: variacionPositiva
-                                    ? Colors.greenAccent
-                                    : Colors.redAccent,
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                '${variacionPositiva ? '+' : ''}${activo.porcentajeVariacion.toStringAsFixed(1)}%',
-                                style: TextStyle(
+                          if (mostrarVariacion) ...<Widget>[
+                            const SizedBox(height: 2),
+                            Row(
+                              children: <Widget>[
+                                Icon(
+                                  variacionPositiva
+                                      ? Icons.trending_up
+                                      : Icons.trending_down,
+                                  size: 14,
                                   color: variacionPositiva
-                                      ? Colors.greenAccent
+                                      ? Colors.green
                                       : Colors.redAccent,
-                                  fontSize: 11,
                                 ),
-                              ),
-                            ],
-                          ),
+                                const SizedBox(width: 2),
+                                Text(
+                                  '${variacionPositiva ? '+' : ''}${activo.porcentajeVariacion.toStringAsFixed(1)}%',
+                                  style: TextStyle(
+                                    color: variacionPositiva
+                                        ? Colors.green
+                                        : Colors.redAccent,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
                       ),
                     ),
                     _BotonMercado(
                       texto: 'Ver',
                       icono: Icons.visibility_outlined,
-                      color: const Color(0xFF2A2A2A),
+                      color: context.colorTarjetaSecundaria,
+                      colorTexto: context.colorTextoPrincipal,
                       onTap: () async {
                         final ResultadoCompraMercado? resultado =
                             await context.pushNamed<ResultadoCompraMercado>(
@@ -399,7 +425,8 @@ class _CardActivoMercado extends StatelessWidget {
                     _BotonMercado(
                       texto: 'Comprar',
                       icono: Icons.shopping_cart_outlined,
-                      color: Colors.red,
+                      color: context.colorPrimarioApp,
+                      colorTexto: Colors.white,
                       onTap: () async {
                         final ResultadoCompraMercado? resultado =
                             await context.pushNamed<ResultadoCompraMercado>(
@@ -438,19 +465,22 @@ class _CardActivoMercado extends StatelessWidget {
           ? ' • ${activo.codigo}'
           : '';
 
-      return '$equipo$codigo\nMedia ${activo.media.toStringAsFixed(1)}';
+      return '$equipo$codigo';
     }
 
     final String nacionalidad = activo.nacionalidad?.isNotEmpty == true
         ? activo.nacionalidad!
         : 'Escudería';
 
-    return '$nacionalidad\nMedia ${activo.media.toStringAsFixed(1)}';
+    return nacionalidad;
   }
 }
 
 class _ImagenActivoMercado extends StatelessWidget {
-  const _ImagenActivoMercado({required this.activo, required this.esEscuderia});
+  const _ImagenActivoMercado({
+    required this.activo,
+    required this.esEscuderia,
+  });
 
   final ActivoMercado activo;
   final bool esEscuderia;
@@ -465,17 +495,23 @@ class _ImagenActivoMercado extends StatelessWidget {
           color: _obtenerColorEscuderia(activo.nombre),
           borderRadius: BorderRadius.circular(6),
         ),
-        child: const Icon(Icons.flag, color: Colors.white, size: 22),
+        child: const Icon(
+          Icons.flag,
+          color: Colors.white,
+          size: 22,
+        ),
       );
     }
 
     return CircleAvatar(
       radius: 22,
-      backgroundColor: const Color(0xFF451414),
+      backgroundColor: context.esTemaOscuro
+          ? const Color(0xFF451414)
+          : const Color(0xFFFFE5E5),
       child: Text(
         _obtenerIniciales(activo),
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: context.esTemaOscuro ? Colors.white : context.colorPrimarioApp,
           fontWeight: FontWeight.bold,
           fontSize: 12,
         ),
@@ -523,12 +559,14 @@ class _BotonMercado extends StatelessWidget {
     required this.texto,
     required this.icono,
     required this.color,
+    required this.colorTexto,
     required this.onTap,
   });
 
   final String texto;
   final IconData icono;
   final Color color;
+  final Color colorTexto;
   final VoidCallback onTap;
 
   @override
@@ -541,11 +579,16 @@ class _BotonMercado extends StatelessWidget {
         label: Text(texto),
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
-          foregroundColor: Colors.white,
+          foregroundColor: colorTexto,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 10),
-          textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          textStyle: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
         ),
       ),
     );

@@ -7,15 +7,13 @@ import '../../../../../dominio/casos_uso/mercado/consultar_detalle_activo_mercad
 import '../../../../../dominio/casos_uso/mercado/consultar_historial_activo_mercado_caso_uso.dart';
 import '../../../../../dominio/entidades/entidades.dart';
 import '../../../../../infraestructura/dependencias/inyeccion_dependencias.dart';
+import '../../../../../infraestructura/extenciones/contexto_extensiones.dart';
 import '../argumentos_activo_mercado.dart';
 import '../compra/compra_activo_mercado_vista.dart';
 import 'cubit/detalle_activo_mercado_cubit.dart';
 
 class DetalleActivoMercadoVista extends StatelessWidget {
-  const DetalleActivoMercadoVista({
-    super.key,
-    required this.argumentos,
-  });
+  const DetalleActivoMercadoVista({super.key, required this.argumentos});
 
   static const String nombre = 'detalleActivoMercado';
   static const String ruta = '/detalle-activo-mercado';
@@ -25,18 +23,22 @@ class DetalleActivoMercadoVista extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<DetalleActivoMercadoCubit>(
-      create: (_) => DetalleActivoMercadoCubit(
-        consultarDetalleActivoCasoUso: sl<ConsultarDetalleActivoMercadoCasoUso>(),
-        consultarHistorialCasoUso: sl<ConsultarHistorialActivoMercadoCasoUso>(),
-      )..cargarDetalle(
-          activoInicial: argumentos.activo,
-          token: argumentos.resultadoAutenticacion.token,
-        ),
+      create: (_) =>
+          DetalleActivoMercadoCubit(
+            consultarDetalleActivoCasoUso:
+                sl<ConsultarDetalleActivoMercadoCasoUso>(),
+            consultarHistorialCasoUso:
+                sl<ConsultarHistorialActivoMercadoCasoUso>(),
+          )..cargarDetalle(
+              activoInicial: argumentos.activo,
+              token: argumentos.resultadoAutenticacion.token,
+            ),
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: context.colorFondo,
         appBar: AppBar(
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
+          backgroundColor: context.colorFondo,
+          foregroundColor: context.colorTextoPrincipal,
+          elevation: 0,
           title: Text(
             argumentos.activo.tipo == TipoActivoMercado.equipo
                 ? 'Detalle de escudería'
@@ -53,7 +55,10 @@ class DetalleActivoMercadoVista extends StatelessWidget {
                 child: Column(
                   children: <Widget>[
                     if (state.cargando)
-                      const LinearProgressIndicator(),
+                      LinearProgressIndicator(
+                        color: context.colorPrimarioApp,
+                        backgroundColor: context.colorTarjetaSecundaria,
+                      ),
 
                     if (state.mensajeError != null) ...<Widget>[
                       const SizedBox(height: 12),
@@ -69,12 +74,12 @@ class DetalleActivoMercadoVista extends StatelessWidget {
 
                     const SizedBox(height: 22),
 
-                    const Align(
+                    Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
                         'Historial reciente',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: context.colorTextoPrincipal,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
@@ -84,9 +89,7 @@ class DetalleActivoMercadoVista extends StatelessWidget {
                     const SizedBox(height: 12),
 
                     Expanded(
-                      child: _ListaHistorialMercado(
-                        historial: state.historial,
-                      ),
+                      child: _ListaHistorialMercado(historial: state.historial),
                     ),
 
                     SizedBox(
@@ -94,23 +97,24 @@ class DetalleActivoMercadoVista extends StatelessWidget {
                       height: 46,
                       child: ElevatedButton.icon(
                         onPressed: () async {
-                        final ResultadoCompraMercado? resultadoCompra =
-                            await context.pushNamed<ResultadoCompraMercado>(
-                          CompraActivoMercadoVista.nombre,
-                          extra: ArgumentosActivoMercado(
-                            activo: activo,
-                            resultadoAutenticacion: argumentos.resultadoAutenticacion,
-                          ),
-                        );
+                          final ResultadoCompraMercado? resultadoCompra =
+                              await context.pushNamed<ResultadoCompraMercado>(
+                            CompraActivoMercadoVista.nombre,
+                            extra: ArgumentosActivoMercado(
+                              activo: activo,
+                              resultadoAutenticacion:
+                                  argumentos.resultadoAutenticacion,
+                            ),
+                          );
 
-                        if (resultadoCompra != null && context.mounted) {
-                          context.pop(resultadoCompra);
-                        }
-                      },
+                          if (resultadoCompra != null && context.mounted) {
+                            context.pop(resultadoCompra);
+                          }
+                        },
                         icon: const Icon(Icons.shopping_cart_outlined),
                         label: const Text('Comprar participaciones'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
+                          backgroundColor: context.colorPrimarioApp,
                           foregroundColor: Colors.white,
                           textStyle: const TextStyle(
                             fontWeight: FontWeight.bold,
@@ -133,22 +137,21 @@ class DetalleActivoMercadoVista extends StatelessWidget {
 }
 
 class _TarjetaDetalleActivo extends StatelessWidget {
-  const _TarjetaDetalleActivo({
-    required this.activo,
-  });
+  const _TarjetaDetalleActivo({required this.activo});
 
   final ActivoMercado activo;
 
   @override
   Widget build(BuildContext context) {
-    final bool variacionPositiva = activo.porcentajeVariacion >= 0;
+    final bool variacionPositiva = activo.porcentajeVariacion > 0;
+    final bool mostrarVariacion = activo.porcentajeVariacion != 0;
 
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B1B1B),
+        color: context.colorTarjeta,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: context.colorBorde),
       ),
       child: Column(
         children: <Widget>[
@@ -162,8 +165,8 @@ class _TarjetaDetalleActivo extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       activo.nombre,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: context.colorTextoPrincipal,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -171,8 +174,8 @@ class _TarjetaDetalleActivo extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       _obtenerDetalle(activo),
-                      style: const TextStyle(
-                        color: Colors.white70,
+                      style: TextStyle(
+                        color: context.colorTextoSecundario,
                         fontSize: 12,
                         height: 1.35,
                       ),
@@ -182,18 +185,23 @@ class _TarjetaDetalleActivo extends StatelessWidget {
               ),
             ],
           ),
-          const Divider(height: 28, color: Colors.white12),
+          Divider(
+            height: 28,
+            color: context.colorBorde,
+          ),
           _FilaDetalle(
             etiqueta: 'Valor actual',
             valor: '\$${activo.valorMercado.toStringAsFixed(0)}',
           ),
-          const SizedBox(height: 10),
-          _FilaDetalle(
-            etiqueta: 'Variación reciente',
-            valor:
-                '${variacionPositiva ? '+' : ''}${activo.porcentajeVariacion.toStringAsFixed(1)}%',
-            colorValor: variacionPositiva ? Colors.greenAccent : Colors.redAccent,
-          ),
+          if (mostrarVariacion) ...<Widget>[
+            const SizedBox(height: 10),
+            _FilaDetalle(
+              etiqueta: 'Variación reciente',
+              valor:
+                  '${variacionPositiva ? '+' : ''}${activo.porcentajeVariacion.toStringAsFixed(1)}%',
+              colorValor: variacionPositiva ? Colors.green : Colors.redAccent,
+            ),
+          ],
           const SizedBox(height: 10),
           _FilaDetalle(
             etiqueta: activo.tipo == TipoActivoMercado.equipo
@@ -210,10 +218,10 @@ class _TarjetaDetalleActivo extends StatelessWidget {
 
   String _obtenerDetalle(ActivoMercado activo) {
     if (activo.tipo == TipoActivoMercado.piloto) {
-      return '${activo.equipo ?? 'Sin escudería'}\nMedia ${activo.media.toStringAsFixed(1)}';
+      return activo.equipo ?? 'Sin escudería';
     }
 
-    return '${activo.nacionalidad ?? 'Escudería'}\nMedia ${activo.media.toStringAsFixed(1)}';
+    return activo.nacionalidad ?? 'Escudería';
   }
 }
 
@@ -221,12 +229,12 @@ class _FilaDetalle extends StatelessWidget {
   const _FilaDetalle({
     required this.etiqueta,
     required this.valor,
-    this.colorValor = Colors.white,
+    this.colorValor,
   });
 
   final String etiqueta;
   final String valor;
-  final Color colorValor;
+  final Color? colorValor;
 
   @override
   Widget build(BuildContext context) {
@@ -235,12 +243,15 @@ class _FilaDetalle extends StatelessWidget {
       children: <Widget>[
         Text(
           etiqueta,
-          style: const TextStyle(color: Colors.white70, fontSize: 13),
+          style: TextStyle(
+            color: context.colorTextoSecundario,
+            fontSize: 13,
+          ),
         ),
         Text(
           valor,
           style: TextStyle(
-            color: colorValor,
+            color: colorValor ?? context.colorTextoPrincipal,
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
@@ -251,9 +262,7 @@ class _FilaDetalle extends StatelessWidget {
 }
 
 class _ListaHistorialMercado extends StatelessWidget {
-  const _ListaHistorialMercado({
-    required this.historial,
-  });
+  const _ListaHistorialMercado({required this.historial});
 
   final List<HistorialMercado> historial;
 
@@ -261,10 +270,12 @@ class _ListaHistorialMercado extends StatelessWidget {
   Widget build(BuildContext context) {
     if (historial.isEmpty) {
       //TODO: Mostrar historial cuando ya hayan eventos o carreras
-      return const Center(
+      return Center(
         child: Text(
           'No hay historial disponible.',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(
+            color: context.colorTextoSecundario,
+          ),
         ),
       );
     }
@@ -274,27 +285,30 @@ class _ListaHistorialMercado extends StatelessWidget {
       separatorBuilder: (_, _) => const SizedBox(height: 10),
       itemBuilder: (BuildContext context, int index) {
         final HistorialMercado item = historial[index];
-        final bool positivo = item.porcentajeVariacion >= 0;
+        final bool positivo = item.porcentajeVariacion > 0;
 
         return Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: const Color(0xFF1B1B1B),
+            color: context.colorTarjeta,
             borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: Colors.white12),
+            border: Border.all(color: context.colorBorde),
           ),
           child: Row(
             children: <Widget>[
               Expanded(
                 child: Text(
                   item.motivo.isNotEmpty ? item.motivo : 'Cambio de mercado',
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                  style: TextStyle(
+                    color: context.colorTextoPrincipal,
+                    fontSize: 13,
+                  ),
                 ),
               ),
               Text(
                 '${positivo ? '+' : ''}${item.porcentajeVariacion.toStringAsFixed(1)}%',
                 style: TextStyle(
-                  color: positivo ? Colors.greenAccent : Colors.redAccent,
+                  color: positivo ? Colors.green : Colors.redAccent,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -307,9 +321,7 @@ class _ListaHistorialMercado extends StatelessWidget {
 }
 
 class _IconoActivoMercado extends StatelessWidget {
-  const _IconoActivoMercado({
-    required this.activo,
-  });
+  const _IconoActivoMercado({required this.activo});
 
   final ActivoMercado activo;
 
@@ -320,21 +332,28 @@ class _IconoActivoMercado extends StatelessWidget {
         width: 52,
         height: 52,
         decoration: BoxDecoration(
-          color: Colors.red,
+          color: context.colorPrimarioApp,
           borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Icon(
+          Icons.flag,
+          color: Colors.white,
+          size: 26,
         ),
       );
     }
 
     return CircleAvatar(
       radius: 26,
-      backgroundColor: const Color(0xFF451414),
+      backgroundColor: context.esTemaOscuro
+          ? const Color(0xFF451414)
+          : const Color(0xFFFFE5E5),
       child: Text(
         activo.codigo?.isNotEmpty == true
             ? activo.codigo!
             : activo.nombre.substring(0, 1).toUpperCase(),
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: context.esTemaOscuro ? Colors.white : context.colorPrimarioApp,
           fontWeight: FontWeight.bold,
         ),
       ),

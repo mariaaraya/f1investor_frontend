@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../dominio/entidades/entidades.dart';
+import '../../../../infraestructura/extenciones/contexto_extensiones.dart';
 import 'cubit/cartera_cubit.dart';
 
 class CarteraVista extends StatelessWidget {
@@ -12,17 +13,105 @@ class CarteraVista extends StatelessWidget {
 
   final ResultadoAutenticacion resultadoAutenticacion;
 
+  Future<bool> _mostrarConfirmacionVenta({
+    required BuildContext context,
+    required ItemCartera item,
+  }) async {
+    final bool? confirmar = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: context.colorTarjeta,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: Text(
+            'Confirmar venta',
+            style: TextStyle(
+              color: context.colorTextoPrincipal,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                '¿Deseas vender esta inversión?',
+                style: TextStyle(
+                  color: context.colorTextoSecundario,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _DatoConfirmacionVenta(
+                etiqueta: 'Activo',
+                valor: item.nombreActivo.isNotEmpty
+                    ? item.nombreActivo
+                    : 'Activo sin nombre',
+              ),
+              const SizedBox(height: 8),
+              _DatoConfirmacionVenta(
+                etiqueta: 'Cantidad',
+                valor: '${item.cantidad.toStringAsFixed(0)} participaciones',
+              ),
+              const SizedBox(height: 8),
+              _DatoConfirmacionVenta(
+                etiqueta: 'Valor actual',
+                valor: '\$${item.valorActualTotal.toStringAsFixed(0)}',
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(
+                'Cancelar',
+                style: TextStyle(
+                  color: context.colorTextoSecundario,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.colorPrimarioApp,
+                foregroundColor: Colors.white,
+                elevation: 0,
+              ),
+              child: const Text(
+                'Vender',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    return confirmar ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF080808),
+      backgroundColor: context.colorFondo,
       body: SafeArea(
         child: BlocConsumer<CarteraCubit, CarteraState>(
           listener: (BuildContext context, CarteraState state) {
             if (state.mensajeError != null) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.mensajeError!),
+                  backgroundColor: context.colorTarjeta,
+                  content: Text(
+                    state.mensajeError!,
+                    style: TextStyle(
+                      color: context.colorTextoPrincipal,
+                    ),
+                  ),
                 ),
               );
 
@@ -31,8 +120,10 @@ class CarteraVista extends StatelessWidget {
           },
           builder: (BuildContext context, CarteraState state) {
             if (state.cargando && state.cartera == null) {
-              return const Center(
-                child: CircularProgressIndicator(),
+              return Center(
+                child: CircularProgressIndicator(
+                  color: context.colorPrimarioApp,
+                ),
               );
             }
 
@@ -61,19 +152,19 @@ class CarteraVista extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    const Text(
+                    Text(
                       'Mi cartera',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: context.colorTextoPrincipal,
                         fontSize: 24,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Tus inversiones actuales',
                       style: TextStyle(
-                        color: Color(0xFFBDBDBD),
+                        color: context.colorTextoSecundario,
                         fontSize: 13,
                       ),
                     ),
@@ -86,22 +177,23 @@ class CarteraVista extends StatelessWidget {
                     const SizedBox(height: 22),
                     Row(
                       children: <Widget>[
-                        const Expanded(
+                        Expanded(
                           child: Text(
                             'Mis inversiones',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: context.colorTextoPrincipal,
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
                         ),
                         if (state.cargando)
-                          const SizedBox(
+                          SizedBox(
                             width: 18,
                             height: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
+                              color: context.colorPrimarioApp,
                             ),
                           ),
                       ],
@@ -116,7 +208,17 @@ class CarteraVista extends StatelessWidget {
                           child: _TarjetaInversion(
                             item: item,
                             vendiendo: state.vendiendo,
-                            onVender: () {
+                            onVender: () async {
+                              final bool confirmar =
+                                  await _mostrarConfirmacionVenta(
+                                context: context,
+                                item: item,
+                              );
+
+                              if (!confirmar || !context.mounted) {
+                                return;
+                              }
+
                               context.read<CarteraCubit>().venderActivo(
                                     token: resultadoAutenticacion.token,
                                     item: item,
@@ -149,14 +251,16 @@ class _ResumenCartera extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool esGanancia = gananciaPerdidaTotal >= 0;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: context.colorTarjeta,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: const Color(0xFF303030),
+          color: context.colorBorde,
         ),
       ),
       child: Column(
@@ -178,8 +282,8 @@ class _ResumenCartera extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          const Divider(
-            color: Color(0xFF303030),
+          Divider(
+            color: context.colorBorde,
             height: 1,
           ),
           const SizedBox(height: 16),
@@ -188,13 +292,9 @@ class _ResumenCartera extends StatelessWidget {
             child: _DatoResumen(
               titulo: 'Ganancia/Pérdida total',
               valor:
-                  '${gananciaPerdidaTotal >= 0 ? '+' : '-'} \$${gananciaPerdidaTotal.abs().toStringAsFixed(0)}',
-              colorValor: gananciaPerdidaTotal >= 0
-                  ? const Color(0xFF00E676)
-                  : const Color(0xFFFF5252),
-              icono: gananciaPerdidaTotal >= 0
-                  ? Icons.trending_up
-                  : Icons.trending_down,
+                  '${esGanancia ? '+' : '-'} \$${gananciaPerdidaTotal.abs().toStringAsFixed(0)}',
+              colorValor: esGanancia ? Colors.green : Colors.redAccent,
+              icono: esGanancia ? Icons.trending_up : Icons.trending_down,
             ),
           ),
         ],
@@ -207,24 +307,26 @@ class _DatoResumen extends StatelessWidget {
   const _DatoResumen({
     required this.titulo,
     required this.valor,
-    this.colorValor = Colors.white,
+    this.colorValor,
     this.icono,
   });
 
   final String titulo;
   final String valor;
-  final Color colorValor;
+  final Color? colorValor;
   final IconData? icono;
 
   @override
   Widget build(BuildContext context) {
+    final Color valorColor = colorValor ?? context.colorTextoPrincipal;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
           titulo,
-          style: const TextStyle(
-            color: Color(0xFFBDBDBD),
+          style: TextStyle(
+            color: context.colorTextoSecundario,
             fontSize: 11,
           ),
         ),
@@ -236,16 +338,20 @@ class _DatoResumen extends StatelessWidget {
               Icon(
                 icono,
                 size: 18,
-                color: colorValor,
+                color: valorColor,
               ),
               const SizedBox(width: 6),
             ],
-            Text(
-              valor,
-              style: TextStyle(
-                color: colorValor,
-                fontSize: 19,
-                fontWeight: FontWeight.w500,
+            Flexible(
+              child: Text(
+                valor,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: valorColor,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ],
@@ -269,18 +375,16 @@ class _TarjetaInversion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool esGanancia = item.gananciaPerdida >= 0;
-    final Color colorGanancia = esGanancia
-        ? const Color(0xFF00E676)
-        : const Color(0xFFFF5252);
+    final Color colorGanancia = esGanancia ? Colors.green : Colors.redAccent;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: context.colorTarjeta,
         borderRadius: BorderRadius.circular(9),
         border: Border.all(
-          color: const Color(0xFF303030),
+          color: context.colorBorde,
         ),
       ),
       child: Column(
@@ -291,7 +395,7 @@ class _TarjetaInversion extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: _obtenerColorActivo(item.tipoActivo),
+                  color: _obtenerColorActivo(context, item.tipoActivo),
                   borderRadius: BorderRadius.circular(5),
                 ),
                 child: Icon(
@@ -311,8 +415,8 @@ class _TarjetaInversion extends StatelessWidget {
                       item.nombreActivo.isNotEmpty
                           ? item.nombreActivo
                           : 'Activo sin nombre',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: context.colorTextoPrincipal,
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
                       ),
@@ -320,8 +424,8 @@ class _TarjetaInversion extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       '${item.cantidad.toStringAsFixed(0)} participaciones',
-                      style: const TextStyle(
-                        color: Color(0xFFBDBDBD),
+                      style: TextStyle(
+                        color: context.colorTextoSecundario,
                         fontSize: 12,
                       ),
                     ),
@@ -331,8 +435,8 @@ class _TarjetaInversion extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 13),
-          const Divider(
-            color: Color(0xFF303030),
+          Divider(
+            color: context.colorBorde,
             height: 1,
           ),
           const SizedBox(height: 12),
@@ -362,10 +466,10 @@ class _TarjetaInversion extends StatelessWidget {
             child: ElevatedButton(
               onPressed: vendiendo ? null : onVender,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2C2C2C),
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: const Color(0xFF202020),
-                disabledForegroundColor: const Color(0xFF777777),
+                backgroundColor: context.colorTarjetaSecundaria,
+                foregroundColor: context.colorTextoPrincipal,
+                disabledBackgroundColor: context.colorTarjetaSecundaria,
+                disabledForegroundColor: context.colorTextoSecundario,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
@@ -385,16 +489,18 @@ class _TarjetaInversion extends StatelessWidget {
     );
   }
 
-  Color _obtenerColorActivo(String tipoActivo) {
+  Color _obtenerColorActivo(BuildContext context, String tipoActivo) {
     if (tipoActivo == 'piloto') {
-      return const Color(0xFFE10600);
+      return context.colorPrimarioApp;
     }
 
     if (tipoActivo == 'equipo') {
-      return const Color(0xFFD9D9D9);
+      return context.esTemaOscuro
+          ? const Color(0xFFD9D9D9)
+          : const Color(0xFF555555);
     }
 
-    return const Color(0xFF555555);
+    return const Color(0xFF777777);
   }
 }
 
@@ -402,12 +508,12 @@ class _DatoInversion extends StatelessWidget {
   const _DatoInversion({
     required this.titulo,
     required this.valor,
-    this.colorValor = Colors.white,
+    this.colorValor,
   });
 
   final String titulo;
   final String valor;
-  final Color colorValor;
+  final Color? colorValor;
 
   @override
   Widget build(BuildContext context) {
@@ -416,8 +522,8 @@ class _DatoInversion extends StatelessWidget {
       children: <Widget>[
         Text(
           titulo,
-          style: const TextStyle(
-            color: Color(0xFFBDBDBD),
+          style: TextStyle(
+            color: context.colorTextoSecundario,
             fontSize: 10,
           ),
         ),
@@ -425,9 +531,48 @@ class _DatoInversion extends StatelessWidget {
         Text(
           valor,
           style: TextStyle(
-            color: colorValor,
+            color: colorValor ?? context.colorTextoPrincipal,
             fontSize: 12,
             fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DatoConfirmacionVenta extends StatelessWidget {
+  const _DatoConfirmacionVenta({
+    required this.etiqueta,
+    required this.valor,
+  });
+
+  final String etiqueta;
+  final String valor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Text(
+            etiqueta,
+            style: TextStyle(
+              color: context.colorTextoSecundario,
+              fontSize: 12,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Flexible(
+          child: Text(
+            valor,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: context.colorTextoPrincipal,
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ),
       ],
@@ -444,16 +589,16 @@ class _CarteraVacia extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: context.colorTarjeta,
         borderRadius: BorderRadius.circular(9),
         border: Border.all(
-          color: const Color(0xFF303030),
+          color: context.colorBorde,
         ),
       ),
-      child: const Text(
+      child: Text(
         'Todavía no tienes inversiones activas.',
         style: TextStyle(
-          color: Color(0xFFBDBDBD),
+          color: context.colorTextoSecundario,
           fontSize: 13,
         ),
       ),
@@ -481,8 +626,8 @@ class _MensajeCartera extends StatelessWidget {
             Text(
               mensaje,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: context.colorTextoPrincipal,
                 fontSize: 14,
               ),
             ),
@@ -490,7 +635,7 @@ class _MensajeCartera extends StatelessWidget {
             ElevatedButton(
               onPressed: onReintentar,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE10600),
+                backgroundColor: context.colorPrimarioApp,
                 foregroundColor: Colors.white,
               ),
               child: const Text('Reintentar'),

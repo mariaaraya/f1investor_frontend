@@ -16,6 +16,8 @@ import 'package:f1investor_frontend/dominio/casos_uso/sesiones/registrar_usuario
 import 'package:f1investor_frontend/dominio/repositorios/cartera/cartera_repositorio.dart';
 import 'package:f1investor_frontend/dominio/repositorios/mercado/mercado_repositorio.dart';
 import 'package:f1investor_frontend/dominio/repositorios/sesiones/autenticacion_repositorio.dart';
+import 'package:f1investor_frontend/infraestructura/preferencias/tema_preferencias.dart';
+import 'package:f1investor_frontend/presentacion/tema/cubit/tema_cubit.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../dominio/casos_uso/mercado/comprar_activo_caso_uso.dart';
@@ -83,7 +85,7 @@ Future<void> configurarDependencias() async {
     () => ComprarActivoCasoUso(mercadoRepositorio: sl<MercadoRepositorio>()),
   );
 
-    sl.registerLazySingleton<CarteraServicio>(
+  sl.registerLazySingleton<CarteraServicio>(
     () => CarteraServicio(apiServicio: sl<ApiServicio>()),
   );
 
@@ -94,14 +96,16 @@ Future<void> configurarDependencias() async {
   );
 
   sl.registerLazySingleton<ObtenerCarteraCasoUso>(
-    () => ObtenerCarteraCasoUso(
-      carteraRepositorio: sl<CarteraRepositorio>(),
-    ),
+    () => ObtenerCarteraCasoUso(carteraRepositorio: sl<CarteraRepositorio>()),
   );
 
   sl.registerLazySingleton<VenderActivoCasoUso>(
-    () => VenderActivoCasoUso(
-      carteraRepositorio: sl<CarteraRepositorio>(),
-    ),
+    () => VenderActivoCasoUso(carteraRepositorio: sl<CarteraRepositorio>()),
+  );
+
+  sl.registerLazySingleton<TemaPreferencias>(() => TemaPreferencias());
+
+  sl.registerFactory<TemaCubit>(
+    () => TemaCubit(temaPreferencias: sl<TemaPreferencias>()),
   );
 }

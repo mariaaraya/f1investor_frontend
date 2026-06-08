@@ -1,8 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../datos/servicios/api/api_servicio.dart';
 import '../../../../dominio/entidades/entidades.dart';
+import '../../../../infraestructura/extenciones/contexto_extensiones.dart';
 
 class InicioVista extends StatefulWidget {
   const InicioVista({
@@ -175,21 +175,27 @@ class _InicioVistaState extends State<InicioVista> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            backgroundColor: const Color(0xFF1C1C1C),
-            title: const Text(
+            backgroundColor: context.colorTarjeta,
+            title: Text(
               'No se pudo simular',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(
+                color: context.colorTextoPrincipal,
+              ),
             ),
             content: Text(
               error.toString().replaceFirst('Exception: ', ''),
-              style: const TextStyle(color: Colors.white70),
+              style: TextStyle(
+                color: context.colorTextoSecundario,
+              ),
             ),
             actions: <Widget>[
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text(
+                child: Text(
                   'Aceptar',
-                  style: TextStyle(color: Color(0xFFE60000)),
+                  style: TextStyle(
+                    color: context.colorPrimarioApp,
+                  ),
                 ),
               ),
             ],
@@ -231,7 +237,7 @@ class _InicioVistaState extends State<InicioVista> {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          backgroundColor: const Color(0xFF111111),
+          backgroundColor: context.colorTarjeta,
           insetPadding: const EdgeInsets.symmetric(
             horizontal: 14,
             vertical: 24,
@@ -251,17 +257,17 @@ class _InicioVistaState extends State<InicioVista> {
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      const Icon(
+                      Icon(
                         Icons.emoji_events_outlined,
-                        color: Color(0xFFE60000),
+                        color: context.colorPrimarioApp,
                         size: 26,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           nombreCarrera,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: context.colorTextoPrincipal,
                             fontSize: 19,
                             fontWeight: FontWeight.w800,
                           ),
@@ -272,8 +278,8 @@ class _InicioVistaState extends State<InicioVista> {
                   const SizedBox(height: 6),
                   Text(
                     siguiente,
-                    style: const TextStyle(
-                      color: Colors.white70,
+                    style: TextStyle(
+                      color: context.colorTextoSecundario,
                       fontSize: 12,
                     ),
                   ),
@@ -282,10 +288,12 @@ class _InicioVistaState extends State<InicioVista> {
                   const SizedBox(height: 8),
                   Expanded(
                     child: resultados.isEmpty
-                        ? const Center(
+                        ? Center(
                             child: Text(
                               'No hay resultados para mostrar.',
-                              style: TextStyle(color: Colors.white70),
+                              style: TextStyle(
+                                color: context.colorTextoSecundario,
+                              ),
                             ),
                           )
                         : ListView.separated(
@@ -307,7 +315,7 @@ class _InicioVistaState extends State<InicioVista> {
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFE60000),
+                        backgroundColor: context.colorPrimarioApp,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -338,7 +346,7 @@ class _InicioVistaState extends State<InicioVista> {
         usuario.patrimonioTotal - usuario.capitalInicial;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080808),
+      backgroundColor: context.colorFondo,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _cargarUltimaCarrera,
@@ -350,17 +358,17 @@ class _InicioVistaState extends State<InicioVista> {
               children: <Widget>[
                 Text(
                   'Hola, ${usuario.nombre}',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.colorTextoPrincipal,
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Temporada actual',
                   style: TextStyle(
-                    color: Color(0xFFBDBDBD),
+                    color: context.colorTextoSecundario,
                     fontSize: 13,
                   ),
                 ),
@@ -397,10 +405,11 @@ class _InicioVistaState extends State<InicioVista> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE60000),
+                      backgroundColor: context.colorPrimarioApp,
                       foregroundColor: Colors.white,
                       disabledForegroundColor: Colors.white70,
-                      disabledBackgroundColor: const Color(0xFF7A0000),
+                      disabledBackgroundColor:
+                          context.colorPrimarioApp.withOpacity(0.55),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(9),
                       ),
@@ -444,12 +453,14 @@ class _TablaUltimaCarrera extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
-          color: const Color(0xFF111111),
+          color: context.colorTarjeta,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white12),
+          border: Border.all(color: context.colorBorde),
         ),
-        child: const Center(
-          child: CircularProgressIndicator(color: Color(0xFFE60000)),
+        child: Center(
+          child: CircularProgressIndicator(
+            color: context.colorPrimarioApp,
+          ),
         ),
       );
     }
@@ -459,25 +470,28 @@ class _TablaUltimaCarrera extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: const Color(0xFF111111),
+          color: context.colorTarjeta,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white12),
+          border: Border.all(color: context.colorBorde),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const Text(
+            Text(
               'Última carrera simulada',
               style: TextStyle(
-                color: Colors.white,
+                color: context.colorTextoPrincipal,
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Aún no hay resultados de carreras simuladas.',
-              style: TextStyle(color: Colors.white70, fontSize: 13),
+              style: TextStyle(
+                color: context.colorTextoSecundario,
+                fontSize: 13,
+              ),
             ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
@@ -485,8 +499,8 @@ class _TablaUltimaCarrera extends StatelessWidget {
               icon: const Icon(Icons.refresh, size: 16),
               label: const Text('Actualizar'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.white,
-                side: const BorderSide(color: Colors.white24),
+                foregroundColor: context.colorTextoPrincipal,
+                side: BorderSide(color: context.colorBorde),
               ),
             ),
           ],
@@ -507,26 +521,26 @@ class _TablaUltimaCarrera extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF111111),
+        color: context.colorTarjeta,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: context.colorBorde),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
             children: <Widget>[
-              const Icon(
+              Icon(
                 Icons.emoji_events_outlined,
-                color: Color(0xFFE60000),
+                color: context.colorPrimarioApp,
                 size: 22,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'Última carrera: $nombreCarrera',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.colorTextoPrincipal,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                   ),
@@ -534,7 +548,10 @@ class _TablaUltimaCarrera extends StatelessWidget {
               ),
               IconButton(
                 onPressed: onActualizar,
-                icon: const Icon(Icons.refresh, color: Colors.white70),
+                icon: Icon(
+                  Icons.refresh,
+                  color: context.colorTextoSecundario,
+                ),
                 tooltip: 'Actualizar resultados',
               ),
             ],
@@ -542,8 +559,8 @@ class _TablaUltimaCarrera extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Round ${round.isEmpty ? '-' : round}${fecha.isEmpty ? '' : ' · $fecha'}',
-            style: const TextStyle(
-              color: Colors.white54,
+            style: TextStyle(
+              color: context.colorTextoSecundario,
               fontSize: 12,
             ),
           ),
@@ -566,8 +583,8 @@ class _TablaUltimaCarrera extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               'Mostrando top 10 de ${resultados.length} posiciones.',
-              style: const TextStyle(
-                color: Colors.white54,
+              style: TextStyle(
+                color: context.colorTextoSecundario,
                 fontSize: 11,
               ),
             ),
@@ -593,66 +610,66 @@ class _CabeceraTablaResultados extends StatelessWidget {
         vertical: 10,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1C),
+        color: context.colorTarjetaSecundaria,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: context.colorBorde),
       ),
       child: Row(
         children: <Widget>[
-          const SizedBox(
+          SizedBox(
             width: 42,
             child: Text(
               'Pos',
               style: TextStyle(
-                color: Colors.white70,
+                color: context.colorTextoSecundario,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          const Expanded(
+          Expanded(
             flex: 3,
             child: Text(
               'Piloto',
               style: TextStyle(
-                color: Colors.white70,
+                color: context.colorTextoSecundario,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
           const SizedBox(width: 8),
-          const Expanded(
+          Expanded(
             flex: 2,
             child: Text(
               'Equipo',
               style: TextStyle(
-                color: Colors.white70,
+                color: context.colorTextoSecundario,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          const SizedBox(
+          SizedBox(
             width: 48,
             child: Text(
               'Pts',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white70,
+                color: context.colorTextoSecundario,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
           if (mostrarEstado)
-            const SizedBox(
+            SizedBox(
               width: 82,
               child: Text(
                 'Estado',
                 textAlign: TextAlign.right,
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: context.colorTextoSecundario,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
@@ -678,23 +695,23 @@ class _FilaResultadoCarrera extends StatelessWidget {
       return Colors.redAccent;
     }
 
-    return Colors.greenAccent;
+    return Colors.green;
   }
 
-  Color _colorPosicion(int posicion) {
+  Color _colorPosicion(BuildContext context, int posicion) {
     if (posicion == 1) {
-      return Colors.amberAccent;
+      return Colors.amber;
     }
 
     if (posicion <= 3) {
-      return Colors.white;
+      return context.colorTextoPrincipal;
     }
 
     if (posicion <= 10) {
-      return Colors.greenAccent;
+      return Colors.green;
     }
 
-    return Colors.white70;
+    return context.colorTextoSecundario;
   }
 
   @override
@@ -720,12 +737,15 @@ class _FilaResultadoCarrera extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: posicion <= 3
-            ? const Color(0xFF241D10)
-            : const Color(0xFF1A1A1A),
+            ? context.esTemaOscuro
+                ? const Color(0xFF241D10)
+                : const Color(0xFFFFF5DB)
+            : context.colorTarjetaSecundaria,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color:
-              posicion <= 3 ? Colors.amber.withOpacity(0.35) : Colors.white10,
+          color: posicion <= 3
+              ? Colors.amber.withOpacity(0.45)
+              : context.colorBorde,
         ),
       ),
       child: Row(
@@ -735,7 +755,7 @@ class _FilaResultadoCarrera extends StatelessWidget {
             child: Text(
               posicion > 0 ? 'P$posicion' : '-',
               style: TextStyle(
-                color: _colorPosicion(posicion),
+                color: _colorPosicion(context, posicion),
                 fontWeight: FontWeight.w800,
                 fontSize: 13,
               ),
@@ -747,8 +767,8 @@ class _FilaResultadoCarrera extends StatelessWidget {
               piloto,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: context.colorTextoPrincipal,
                 fontWeight: FontWeight.w700,
                 fontSize: 13,
               ),
@@ -761,8 +781,8 @@ class _FilaResultadoCarrera extends StatelessWidget {
               equipo,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white70,
+              style: TextStyle(
+                color: context.colorTextoSecundario,
                 fontSize: 12,
               ),
             ),
@@ -772,8 +792,8 @@ class _FilaResultadoCarrera extends StatelessWidget {
             child: Text(
               puntos.toStringAsFixed(puntos % 1 == 0 ? 0 : 1),
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: context.colorTextoPrincipal,
                 fontWeight: FontWeight.w800,
                 fontSize: 13,
               ),
@@ -819,25 +839,25 @@ class _TarjetaResumen extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1C),
+        color: context.colorTarjeta,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF333333)),
+        border: Border.all(color: context.colorBorde),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text(
+          Text(
             'Capital disponible',
             style: TextStyle(
-              color: Color(0xFFBDBDBD),
+              color: context.colorTextoSecundario,
               fontSize: 13,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             capitalDisponible,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: context.colorTextoPrincipal,
               fontSize: 30,
               fontWeight: FontWeight.w800,
             ),
@@ -849,7 +869,6 @@ class _TarjetaResumen extends StatelessWidget {
                 child: _DatoResumen(
                   titulo: 'Valor cartera',
                   valor: valorCartera,
-                  colorValor: Colors.white,
                 ),
               ),
               Expanded(
@@ -857,8 +876,8 @@ class _TarjetaResumen extends StatelessWidget {
                   titulo: 'Ganancia/Pérdida',
                   valor: gananciaPerdida,
                   colorValor: gananciaPositiva
-                      ? Colors.greenAccent
-                      : const Color(0xFFE60000),
+                      ? Colors.green
+                      : context.colorPrimarioApp,
                 ),
               ),
             ],
@@ -873,12 +892,12 @@ class _DatoResumen extends StatelessWidget {
   const _DatoResumen({
     required this.titulo,
     required this.valor,
-    required this.colorValor,
+    this.colorValor,
   });
 
   final String titulo;
   final String valor;
-  final Color colorValor;
+  final Color? colorValor;
 
   @override
   Widget build(BuildContext context) {
@@ -887,8 +906,8 @@ class _DatoResumen extends StatelessWidget {
       children: <Widget>[
         Text(
           titulo,
-          style: const TextStyle(
-            color: Color(0xFFBDBDBD),
+          style: TextStyle(
+            color: context.colorTextoSecundario,
             fontSize: 13,
           ),
         ),
@@ -896,7 +915,7 @@ class _DatoResumen extends StatelessWidget {
         Text(
           valor,
           style: TextStyle(
-            color: colorValor,
+            color: colorValor ?? context.colorTextoPrincipal,
             fontSize: 15,
             fontWeight: FontWeight.w800,
           ),

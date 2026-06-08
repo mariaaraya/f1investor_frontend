@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../infraestructura/extenciones/contexto_extensiones.dart';
 import '../inicio_sesion/inicio_sesion_vista.dart';
 
 class RecuperarPasswordVista extends StatelessWidget {
@@ -36,7 +37,7 @@ class RecuperarPasswordVista extends StatelessWidget {
             titulo: 'No se pudo actualizar',
             mensaje: state.mensajeError!,
             icono: Icons.error_outline,
-            colorIcono: const Color(0xFFE60000),
+            colorIcono: context.colorPrimarioApp,
           );
         }
 
@@ -77,12 +78,11 @@ class _ContenidoRecuperarPassword extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final RecuperarPasswordState state = context
-        .watch<RecuperarPasswordCubit>()
-        .state;
+    final RecuperarPasswordState state =
+        context.watch<RecuperarPasswordCubit>().state;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080808),
+      backgroundColor: context.colorFondo,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -97,27 +97,30 @@ class _ContenidoRecuperarPassword extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: IconButton(
                       onPressed: state.cargando ? null : onVolver,
-                      icon: const Icon(Icons.arrow_back, color: Colors.white70),
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: context.colorTextoSecundario,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 54),
                   const _LogoRecuperarPassword(),
                   const SizedBox(height: 22),
-                  const Text(
+                  Text(
                     'Cambiar contraseña',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: context.colorTextoPrincipal,
                       fontSize: 30,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
+                  Text(
                     'Ingresa tu correo y define una nueva contraseña.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Color(0xFFE0E0E0),
+                      color: context.colorTextoSecundario,
                       fontSize: 14,
                     ),
                   ),
@@ -126,9 +129,8 @@ class _ContenidoRecuperarPassword extends StatelessWidget {
                     etiqueta: 'Correo electrónico',
                     hint: 'correo@ejemplo.com',
                     tipoTeclado: TextInputType.emailAddress,
-                    onChanged: context
-                        .read<RecuperarPasswordCubit>()
-                        .actualizarCorreo,
+                    onChanged:
+                        context.read<RecuperarPasswordCubit>().actualizarCorreo,
                   ),
                   const SizedBox(height: 22),
                   _CampoRecuperarPassword(
@@ -140,10 +142,10 @@ class _ContenidoRecuperarPassword extends StatelessWidget {
                         .actualizarNuevoPassword,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.',
                     style: TextStyle(
-                      color: Color(0xFFBDBDBD),
+                      color: context.colorTextoSecundario,
                       fontSize: 12,
                       height: 1.3,
                     ),
@@ -167,10 +169,9 @@ class _ContenidoRecuperarPassword extends StatelessWidget {
                               .recuperarPassword
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFE60000),
-                        disabledBackgroundColor: const Color(
-                          0xFFE60000,
-                        ).withOpacity(0.60),
+                        backgroundColor: context.colorPrimarioApp,
+                        disabledBackgroundColor:
+                            context.colorPrimarioApp.withOpacity(0.60),
                         foregroundColor: Colors.white,
                         disabledForegroundColor: Colors.white70,
                         shape: RoundedRectangleBorder(
@@ -203,8 +204,8 @@ class _ContenidoRecuperarPassword extends StatelessWidget {
                       vieneDesdePerfil
                           ? 'Volver al perfil'
                           : 'Volver al inicio de sesión',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: context.colorTextoPrincipal,
                         fontSize: 15,
                       ),
                     ),
@@ -230,12 +231,11 @@ class _LogoRecuperarPassword extends StatelessWidget {
         'assets/imagenes/f1_logo.png',
         height: 42,
         fit: BoxFit.contain,
-        errorBuilder:
-            (BuildContext context, Object error, StackTrace? stackTrace) {
-          return const Text(
+        errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+          return Text(
             'F1',
             style: TextStyle(
-              color: Color(0xFFE60000),
+              color: context.colorPrimarioApp,
               fontSize: 36,
               fontWeight: FontWeight.w900,
               fontStyle: FontStyle.italic,
@@ -285,8 +285,8 @@ class _CampoRecuperarPasswordState extends State<_CampoRecuperarPassword> {
       children: <Widget>[
         Text(
           widget.etiqueta,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: context.colorTextoPrincipal,
             fontSize: 13,
             fontWeight: FontWeight.w700,
           ),
@@ -296,16 +296,19 @@ class _CampoRecuperarPasswordState extends State<_CampoRecuperarPassword> {
           onChanged: widget.onChanged,
           obscureText: ocultarTexto,
           keyboardType: widget.tipoTeclado,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
-          cursorColor: const Color(0xFFE60000),
+          style: TextStyle(
+            color: context.colorTextoPrincipal,
+            fontSize: 14,
+          ),
+          cursorColor: context.colorPrimarioApp,
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: const TextStyle(
-              color: Color(0xFF9E9E9E),
+            hintStyle: TextStyle(
+              color: context.colorHint,
               fontSize: 14,
             ),
             filled: true,
-            fillColor: const Color(0xFF1C1C1C),
+            fillColor: context.colorCampo,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 15,
@@ -317,18 +320,18 @@ class _CampoRecuperarPasswordState extends State<_CampoRecuperarPassword> {
                       _mostrarTexto
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
-                      color: Colors.white70,
+                      color: context.colorTextoSecundario,
                     ),
                   )
                 : null,
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(7),
-              borderSide: const BorderSide(color: Color(0xFF333333)),
+              borderSide: BorderSide(color: context.colorBorde),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(7),
-              borderSide: const BorderSide(
-                color: Color(0xFFE60000),
+              borderSide: BorderSide(
+                color: context.colorPrimarioApp,
                 width: 1.2,
               ),
             ),

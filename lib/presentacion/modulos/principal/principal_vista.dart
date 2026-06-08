@@ -1,17 +1,18 @@
 import 'package:f1investor_frontend/dominio/casos_uso/cartera/obtener_cartera_caso_uso.dart';
 import 'package:f1investor_frontend/dominio/casos_uso/cartera/vender_activo_caso_uso.dart';
 import 'package:f1investor_frontend/infraestructura/dependencias/inyeccion_dependencias.dart';
+import 'package:f1investor_frontend/presentacion/modulos/principal/cartera/carerta_vista.dart';
 import 'package:f1investor_frontend/presentacion/modulos/principal/cartera/cubit/cartera_cubit.dart';
+import 'package:f1investor_frontend/presentacion/modulos/principal/perfil/perfil_vista.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../dominio/entidades/entidades.dart';
-import 'cartera/carerta_vista.dart';
+import '../../../infraestructura/extenciones/contexto_extensiones.dart';
 import 'inicio/inicio_vista.dart';
 import 'mercado/mercado_vista.dart';
 import 'mercado/resultado_compra_mercado.dart';
 import 'resultados/resultados_vista.dart';
-import 'perfil/perfil_vista.dart';
 
 class PrincipalVista extends StatefulWidget {
   const PrincipalVista({super.key, required this.resultadoAutenticacion});
@@ -164,6 +165,7 @@ class _PrincipalVistaState extends State<PrincipalVista> {
     ];
 
     return Scaffold(
+      backgroundColor: context.colorFondo,
       body: IndexedStack(
         index: _indiceSeleccionado,
         children: vistas,
@@ -172,6 +174,17 @@ class _PrincipalVistaState extends State<PrincipalVista> {
         currentIndex: _indiceSeleccionado,
         onTap: _cambiarVista,
         type: BottomNavigationBarType.fixed,
+        backgroundColor: context.colorTarjeta,
+        selectedItemColor: context.colorPrimarioApp,
+        unselectedItemColor: context.colorTextoSecundario,
+        selectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w700,
+          fontSize: 12,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 12,
+        ),
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),

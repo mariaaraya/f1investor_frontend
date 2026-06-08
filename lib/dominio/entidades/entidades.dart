@@ -12,3 +12,6 @@ export 'package:f1investor_frontend/dominio/entidades/mercado/compra_activo_resp
 //Cartera
 export 'package:f1investor_frontend/dominio/entidades/cartera/item_cartera.dart';
 export 'package:f1investor_frontend/dominio/entidades/cartera/cartera.dart';
+
+//Tema
+export 'package:f1investor_frontend/dominio/entidades/tema/tema_aplicacion.dart';

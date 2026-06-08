@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../dominio/casos_uso/mercado/comprar_activo_caso_uso.dart';
 import '../../../../../dominio/entidades/entidades.dart';
 import '../../../../../infraestructura/dependencias/inyeccion_dependencias.dart';
+import '../../../../../infraestructura/extenciones/contexto_extensiones.dart';
 import '../argumentos_activo_mercado.dart';
 import 'cubit/compra_activo_mercado_cubit.dart';
 
@@ -60,7 +61,7 @@ class _CompraActivoMercadoVistaState extends State<CompraActivoMercadoVista> {
               titulo: 'No se pudo realizar la compra',
               mensaje: state.mensajeError!,
               icono: Icons.error_outline,
-              colorIcono: const Color(0xFFE60000),
+              colorIcono: context.colorPrimarioApp,
             );
 
             if (context.mounted) {
@@ -92,10 +93,11 @@ class _CompraActivoMercadoVistaState extends State<CompraActivoMercadoVista> {
         },
         builder: (BuildContext context, CompraActivoMercadoState state) {
           return Scaffold(
-            backgroundColor: Colors.black,
+            backgroundColor: context.colorFondo,
             appBar: AppBar(
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
+              backgroundColor: context.colorFondo,
+              foregroundColor: context.colorTextoPrincipal,
+              elevation: 0,
               title: const Text('Comprar participaciones'),
             ),
             body: SafeArea(
@@ -106,9 +108,9 @@ class _CompraActivoMercadoVistaState extends State<CompraActivoMercadoVista> {
                     Container(
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1B1B1B),
+                        color: context.colorTarjeta,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.white12),
+                        border: Border.all(color: context.colorBorde),
                       ),
                       child: Column(
                         children: <Widget>[
@@ -122,16 +124,16 @@ class _CompraActivoMercadoVistaState extends State<CompraActivoMercadoVista> {
                                   children: <Widget>[
                                     Text(
                                       activo.nombre,
-                                      style: const TextStyle(
-                                        color: Colors.white,
+                                      style: TextStyle(
+                                        color: context.colorTextoPrincipal,
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     Text(
                                       '\$${activo.valorMercado.toStringAsFixed(0)} por participación',
-                                      style: const TextStyle(
-                                        color: Colors.white70,
+                                      style: TextStyle(
+                                        color: context.colorTextoSecundario,
                                         fontSize: 12,
                                       ),
                                     ),
@@ -140,19 +142,22 @@ class _CompraActivoMercadoVistaState extends State<CompraActivoMercadoVista> {
                               ),
                             ],
                           ),
-                          const Divider(height: 28, color: Colors.white12),
+                          Divider(
+                            height: 28,
+                            color: context.colorBorde,
+                          ),
                           _FilaCompra(
                             etiqueta: 'Capital disponible',
                             valor:
                                 '\$${resultado.usuario.capital.toStringAsFixed(0)}',
                           ),
                           const SizedBox(height: 18),
-                          const Align(
+                          Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
                               'Cantidad de participaciones',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: context.colorTextoPrincipal,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -165,23 +170,31 @@ class _CompraActivoMercadoVistaState extends State<CompraActivoMercadoVista> {
                               decimal: true,
                             ),
                             onChanged: (_) => setState(() {}),
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(
+                              color: context.colorTextoPrincipal,
+                            ),
+                            cursorColor: context.colorPrimarioApp,
                             decoration: InputDecoration(
                               filled: true,
-                              fillColor: const Color(0xFF171717),
+                              fillColor: context.colorCampo,
                               enabledBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                  color: Colors.white12,
+                                borderSide: BorderSide(
+                                  color: context.colorBorde,
                                 ),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.red),
+                                borderSide: BorderSide(
+                                  color: context.colorPrimarioApp,
+                                ),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                             ),
                           ),
-                          const Divider(height: 28, color: Colors.white12),
+                          Divider(
+                            height: 28,
+                            color: context.colorBorde,
+                          ),
                           _FilaCompra(
                             etiqueta: 'Total estimado',
                             valor: '\$${_totalEstimado.toStringAsFixed(0)}',
@@ -200,8 +213,14 @@ class _CompraActivoMercadoVistaState extends State<CompraActivoMercadoVista> {
                                   ? null
                                   : () => Navigator.of(context).pop(),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2A2A2A),
-                                foregroundColor: Colors.white,
+                                backgroundColor:
+                                    context.colorTarjetaSecundaria,
+                                foregroundColor: context.colorTextoPrincipal,
+                                disabledBackgroundColor:
+                                    context.colorTarjetaSecundaria,
+                                disabledForegroundColor:
+                                    context.colorTextoSecundario,
+                                elevation: 0,
                               ),
                               child: const Text('Cancelar'),
                             ),
@@ -226,8 +245,12 @@ class _CompraActivoMercadoVistaState extends State<CompraActivoMercadoVista> {
                                           );
                                     },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
+                                backgroundColor: context.colorPrimarioApp,
                                 foregroundColor: Colors.white,
+                                disabledBackgroundColor:
+                                    context.colorPrimarioApp.withOpacity(0.55),
+                                disabledForegroundColor: Colors.white70,
+                                elevation: 0,
                               ),
                               child: state.cargando
                                   ? const SizedBox(
@@ -235,6 +258,7 @@ class _CompraActivoMercadoVistaState extends State<CompraActivoMercadoVista> {
                                       height: 18,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
+                                        color: Colors.white,
                                       ),
                                     )
                                   : const Text('Confirmar'),
@@ -267,9 +291,18 @@ class _FilaCompra extends StatelessWidget {
       children: <Widget>[
         Text(
           etiqueta,
-          style: const TextStyle(color: Colors.white70, fontSize: 13),
+          style: TextStyle(
+            color: context.colorTextoSecundario,
+            fontSize: 13,
+          ),
         ),
-        Text(valor, style: const TextStyle(color: Colors.white, fontSize: 16)),
+        Text(
+          valor,
+          style: TextStyle(
+            color: context.colorTextoPrincipal,
+            fontSize: 16,
+          ),
+        ),
       ],
     );
   }
@@ -287,20 +320,30 @@ class _IconoCompraActivo extends StatelessWidget {
         width: 38,
         height: 38,
         decoration: BoxDecoration(
-          color: Colors.red,
+          color: context.colorPrimarioApp,
           borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Icon(
+          Icons.flag,
+          color: Colors.white,
+          size: 22,
         ),
       );
     }
 
     return CircleAvatar(
       radius: 20,
-      backgroundColor: const Color(0xFF451414),
+      backgroundColor: context.esTemaOscuro
+          ? const Color(0xFF451414)
+          : const Color(0xFFFFE5E5),
       child: Text(
         activo.codigo?.isNotEmpty == true
             ? activo.codigo!
             : activo.nombre.substring(0, 1).toUpperCase(),
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: context.esTemaOscuro ? Colors.white : context.colorPrimarioApp,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

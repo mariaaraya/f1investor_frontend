@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../datos/servicios/api/api_servicio.dart';
 import '../../../../dominio/entidades/entidades.dart';
+import '../../../../infraestructura/extenciones/contexto_extensiones.dart';
 
 class ResultadosVista extends StatefulWidget {
-  const ResultadosVista({
-    super.key,
-    required this.resultadoAutenticacion,
-  });
+  const ResultadosVista({super.key, required this.resultadoAutenticacion});
 
   final ResultadoAutenticacion resultadoAutenticacion;
 
@@ -25,13 +23,12 @@ class _ResultadosVistaState extends State<ResultadosVista> {
   List<Map<String, dynamic>> _resultados = <Map<String, dynamic>>[];
 
   Map<String, dynamic>? _ultimaCarrera;
-  List<Map<String, dynamic>> _resultadosUltimaCarrera = <Map<String, dynamic>>[];
+  List<Map<String, dynamic>> _resultadosUltimaCarrera =
+      <Map<String, dynamic>>[];
 
   List<_RankingItem> _rankingPilotos = <_RankingItem>[];
   List<_RankingItem> _rankingEquipos = <_RankingItem>[];
 
-  int _totalAbandonos = 0;
-  int _totalFinalizados = 0;
   double _totalPuntos = 0;
 
   @override
@@ -59,13 +56,13 @@ class _ResultadosVistaState extends State<ResultadosVista> {
       final List<Map<String, dynamic>> carreras = carrerasRaw
           .whereType<Map<dynamic, dynamic>>()
           .map((Map<dynamic, dynamic> item) => Map<String, dynamic>.from(item))
-          .toList();
+          .where((Map<String, dynamic> carrera) {
+            final int temporadaAnio =
+                int.tryParse(carrera['temporada_anio']?.toString() ?? '') ?? 0;
 
-      carreras.sort((Map<String, dynamic> a, Map<String, dynamic> b) {
-        final int roundA = int.tryParse(a['round_number']?.toString() ?? '') ?? 0;
-        final int roundB = int.tryParse(b['round_number']?.toString() ?? '') ?? 0;
-        return roundA.compareTo(roundB);
-      });
+            return temporadaAnio == 2027;
+          })
+          .toList();
 
       final List<Map<String, dynamic>> todosLosResultados =
           <Map<String, dynamic>>[];
@@ -115,8 +112,6 @@ class _ResultadosVistaState extends State<ResultadosVista> {
         _resultadosUltimaCarrera = resultadosUltima;
         _rankingPilotos = metricas.rankingPilotos;
         _rankingEquipos = metricas.rankingEquipos;
-        _totalAbandonos = metricas.totalAbandonos;
-        _totalFinalizados = metricas.totalFinalizados;
         _totalPuntos = metricas.totalPuntos;
       });
     } catch (error) {
@@ -145,25 +140,23 @@ class _ResultadosVistaState extends State<ResultadosVista> {
         .toList();
 
     resultados.sort((Map<String, dynamic> a, Map<String, dynamic> b) {
-      final int posicionA = int.tryParse(a['posicion']?.toString() ?? '') ?? 999;
-      final int posicionB = int.tryParse(b['posicion']?.toString() ?? '') ?? 999;
+      final int posicionA =
+          int.tryParse(a['posicion']?.toString() ?? '') ?? 999;
+      final int posicionB =
+          int.tryParse(b['posicion']?.toString() ?? '') ?? 999;
       return posicionA.compareTo(posicionB);
     });
 
     return resultados;
   }
 
-  _MetricasResultados _calcularMetricas(
-    List<Map<String, dynamic>> resultados,
-  ) {
+  _MetricasResultados _calcularMetricas(List<Map<String, dynamic>> resultados) {
     final Map<String, _AcumuladoRanking> pilotos =
         <String, _AcumuladoRanking>{};
 
     final Map<String, _AcumuladoRanking> equipos =
         <String, _AcumuladoRanking>{};
 
-    int abandonos = 0;
-    int finalizados = 0;
     double puntosTotales = 0;
 
     for (final Map<String, dynamic> resultado in resultados) {
@@ -176,12 +169,6 @@ class _ResultadosVistaState extends State<ResultadosVista> {
           double.tryParse(resultado['puntos']?.toString() ?? '0') ?? 0.0;
 
       puntosTotales += puntos;
-
-      if (estado == 'abandono' || estado == 'dsq') {
-        abandonos++;
-      } else {
-        finalizados++;
-      }
 
       pilotos.putIfAbsent(piloto, () => _AcumuladoRanking(nombre: piloto));
       equipos.putIfAbsent(equipo, () => _AcumuladoRanking(nombre: equipo));
@@ -201,33 +188,25 @@ class _ResultadosVistaState extends State<ResultadosVista> {
       equipos[equipo]!.abandonos += estado == 'abandono' ? 1 : 0;
     }
 
-    final List<_RankingItem> rankingPilotos = pilotos.values
-        .map((e) => e.toRankingItem())
-        .toList()
-      ..sort((a, b) => b.puntos.compareTo(a.puntos));
+    final List<_RankingItem> rankingPilotos =
+        pilotos.values.map((e) => e.toRankingItem()).toList()
+          ..sort((a, b) => b.puntos.compareTo(a.puntos));
 
-    final List<_RankingItem> rankingEquipos = equipos.values
-        .map((e) => e.toRankingItem())
-        .toList()
-      ..sort((a, b) => b.puntos.compareTo(a.puntos));
+    final List<_RankingItem> rankingEquipos =
+        equipos.values.map((e) => e.toRankingItem()).toList()
+          ..sort((a, b) => b.puntos.compareTo(a.puntos));
 
     return _MetricasResultados(
       rankingPilotos: rankingPilotos,
       rankingEquipos: rankingEquipos,
-      totalAbandonos: abandonos,
-      totalFinalizados: finalizados,
       totalPuntos: puntosTotales,
     );
-  }
-
-  String _formatearNumero(double valor) {
-    return valor.toStringAsFixed(valor % 1 == 0 ? 0 : 1);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF080808),
+      backgroundColor: context.colorFondo,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _cargarResultados,
@@ -237,24 +216,23 @@ class _ResultadosVistaState extends State<ResultadosVista> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const Text(
+                Text(
                   'Resultados',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: context.colorTextoPrincipal,
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
+                Text(
                   'Métricas, rankings y desempeño de las carreras simuladas',
                   style: TextStyle(
-                    color: Colors.white70,
+                    color: context.colorTextoSecundario,
                     fontSize: 13,
                   ),
                 ),
                 const SizedBox(height: 22),
-
                 if (_cargando && _resultados.isEmpty)
                   const _CargandoResultados()
                 else if (_mensajeError != null && _resultados.isEmpty)
@@ -267,25 +245,19 @@ class _ResultadosVistaState extends State<ResultadosVista> {
                 else ...<Widget>[
                   _ResumenGeneralResultados(
                     carrerasSimuladas: _carreras.length,
-                    totalResultados: _resultados.length,
-                    totalFinalizados: _totalFinalizados,
-                    totalAbandonos: _totalAbandonos,
                     totalPuntos: _totalPuntos,
                   ),
                   const SizedBox(height: 18),
-
                   _SeccionUltimaCarrera(
                     carrera: _ultimaCarrera,
                     resultados: _resultadosUltimaCarrera,
                   ),
                   const SizedBox(height: 18),
-
                   _SeccionGraficos(
                     rankingPilotos: _rankingPilotos,
                     rankingEquipos: _rankingEquipos,
                   ),
                   const SizedBox(height: 18),
-
                   _RankingPanel(
                     titulo: 'Ranking de pilotos',
                     subtitulo: 'Ordenado por puntos acumulados',
@@ -293,7 +265,6 @@ class _ResultadosVistaState extends State<ResultadosVista> {
                     mostrarPromedio: true,
                   ),
                   const SizedBox(height: 18),
-
                   _RankingPanel(
                     titulo: 'Ranking de equipos',
                     subtitulo: 'Puntos acumulados por escudería',
@@ -301,7 +272,6 @@ class _ResultadosVistaState extends State<ResultadosVista> {
                     mostrarPromedio: false,
                   ),
                   const SizedBox(height: 22),
-
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
@@ -309,8 +279,8 @@ class _ResultadosVistaState extends State<ResultadosVista> {
                       icon: const Icon(Icons.refresh),
                       label: const Text('Actualizar resultados'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white24),
+                        foregroundColor: context.colorTextoPrincipal,
+                        side: BorderSide(color: context.colorBorde),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                     ),
@@ -328,70 +298,30 @@ class _ResultadosVistaState extends State<ResultadosVista> {
 class _ResumenGeneralResultados extends StatelessWidget {
   const _ResumenGeneralResultados({
     required this.carrerasSimuladas,
-    required this.totalResultados,
-    required this.totalFinalizados,
-    required this.totalAbandonos,
     required this.totalPuntos,
   });
 
   final int carrerasSimuladas;
-  final int totalResultados;
-  final int totalFinalizados;
-  final int totalAbandonos;
   final double totalPuntos;
 
   @override
   Widget build(BuildContext context) {
-    final double porcentajeAbandono = totalResultados == 0
-        ? 0
-        : (totalAbandonos / totalResultados) * 100;
-
-    return Column(
+    return Row(
       children: <Widget>[
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: _MetricaCard(
-                titulo: 'Carreras',
-                valor: carrerasSimuladas.toString(),
-                icono: Icons.sports_score_outlined,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _MetricaCard(
-                titulo: 'Resultados',
-                valor: totalResultados.toString(),
-                icono: Icons.format_list_numbered,
-              ),
-            ),
-          ],
+        Expanded(
+          child: _MetricaCard(
+            titulo: 'Carreras',
+            valor: carrerasSimuladas.toString(),
+            icono: Icons.sports_score_outlined,
+          ),
         ),
-        const SizedBox(height: 10),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: _MetricaCard(
-                titulo: 'Finalizados',
-                valor: totalFinalizados.toString(),
-                icono: Icons.check_circle_outline,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _MetricaCard(
-                titulo: 'Abandonos',
-                valor: '${totalAbandonos.toString()} (${porcentajeAbandono.toStringAsFixed(1)}%)',
-                icono: Icons.warning_amber_outlined,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        _MetricaCard(
-          titulo: 'Puntos entregados',
-          valor: totalPuntos.toStringAsFixed(totalPuntos % 1 == 0 ? 0 : 1),
-          icono: Icons.star_border,
+        const SizedBox(width: 10),
+        Expanded(
+          child: _MetricaCard(
+            titulo: 'Puntos',
+            valor: totalPuntos.toStringAsFixed(totalPuntos % 1 == 0 ? 0 : 1),
+            icono: Icons.star_border,
+          ),
         ),
       ],
     );
@@ -412,27 +342,27 @@ class _MetricaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-  constraints: const BoxConstraints(
-    minHeight: 92,
-  ),
-  padding: const EdgeInsets.all(14),
-  decoration: BoxDecoration(
-    color: const Color(0xFF151515),
-    borderRadius: BorderRadius.circular(12),
-    border: Border.all(color: Colors.white12),
-  ),
+      constraints: const BoxConstraints(minHeight: 92),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: context.colorTarjeta,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.colorBorde),
+      ),
       child: Row(
         children: <Widget>[
           Container(
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: const Color(0xFF2A0A0A),
+              color: context.esTemaOscuro
+                  ? const Color(0xFF2A0A0A)
+                  : const Color(0xFFFFE5E5),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
               icono,
-              color: const Color(0xFFE60000),
+              color: context.colorPrimarioApp,
               size: 22,
             ),
           ),
@@ -443,8 +373,8 @@ class _MetricaCard extends StatelessWidget {
               children: <Widget>[
                 Text(
                   titulo,
-                  style: const TextStyle(
-                    color: Colors.white60,
+                  style: TextStyle(
+                    color: context.colorTextoSecundario,
                     fontSize: 12,
                   ),
                 ),
@@ -453,8 +383,8 @@ class _MetricaCard extends StatelessWidget {
                   valor,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.colorTextoPrincipal,
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
                   ),
@@ -485,8 +415,9 @@ class _SeccionUltimaCarrera extends StatelessWidget {
     final String round = carrera?['round_number']?.toString() ?? '-';
     final String fecha = carrera?['fecha']?.toString() ?? '';
 
-    final List<Map<String, dynamic>> top10 =
-        resultados.length > 10 ? resultados.take(10).toList() : resultados;
+    final List<Map<String, dynamic>> top10 = resultados.length > 10
+        ? resultados.take(10).toList()
+        : resultados;
 
     final List<Map<String, dynamic>> abandonos = resultados
         .where((r) => r['estado_final']?.toString() == 'abandono')
@@ -496,25 +427,25 @@ class _SeccionUltimaCarrera extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF111111),
+        color: context.colorTarjeta,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: context.colorBorde),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
             children: <Widget>[
-              const Icon(
+              Icon(
                 Icons.emoji_events_outlined,
-                color: Color(0xFFE60000),
+                color: context.colorPrimarioApp,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'Última carrera: $nombreCarrera',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.colorTextoPrincipal,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                   ),
@@ -525,20 +456,16 @@ class _SeccionUltimaCarrera extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Round $round${fecha.isEmpty ? '' : ' · $fecha'}',
-            style: const TextStyle(
-              color: Colors.white54,
+            style: TextStyle(
+              color: context.colorTextoSecundario,
               fontSize: 12,
             ),
           ),
           const SizedBox(height: 14),
-
-          if (resultados.isNotEmpty)
-            _PodioResumen(resultados: resultados),
-
+          if (resultados.isNotEmpty) _PodioResumen(resultados: resultados),
           const SizedBox(height: 14),
           const _CabeceraTablaResultados(mostrarEstado: true),
           const SizedBox(height: 8),
-
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -551,18 +478,16 @@ class _SeccionUltimaCarrera extends StatelessWidget {
               );
             },
           ),
-
           if (resultados.length > 10) ...<Widget>[
             const SizedBox(height: 8),
             Text(
               'Mostrando top 10 de ${resultados.length} posiciones.',
-              style: const TextStyle(
-                color: Colors.white54,
+              style: TextStyle(
+                color: context.colorTextoSecundario,
                 fontSize: 11,
               ),
             ),
           ],
-
           if (abandonos.isNotEmpty) ...<Widget>[
             const SizedBox(height: 14),
             Text(
@@ -580,9 +505,7 @@ class _SeccionUltimaCarrera extends StatelessWidget {
 }
 
 class _PodioResumen extends StatelessWidget {
-  const _PodioResumen({
-    required this.resultados,
-  });
+  const _PodioResumen({required this.resultados});
 
   final List<Map<String, dynamic>> resultados;
 
@@ -644,22 +567,20 @@ class _PodioCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-  constraints: const BoxConstraints(
-    minHeight: 92,
-  ),
-  padding: const EdgeInsets.all(14),
-  decoration: BoxDecoration(
-    color: const Color(0xFF151515),
-    borderRadius: BorderRadius.circular(12),
-    border: Border.all(color: Colors.white12),
-  ),
+      constraints: const BoxConstraints(minHeight: 92),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: context.colorTarjetaSecundaria,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.colorBorde),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
             posicion,
             style: TextStyle(
-              color: destacado ? Colors.amberAccent : Colors.white70,
+              color: destacado ? Colors.amber : context.colorTextoSecundario,
               fontSize: 13,
               fontWeight: FontWeight.w800,
             ),
@@ -669,8 +590,8 @@ class _PodioCard extends StatelessWidget {
             piloto,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: context.colorTextoPrincipal,
               fontSize: 12,
               fontWeight: FontWeight.w800,
             ),
@@ -680,8 +601,8 @@ class _PodioCard extends StatelessWidget {
             equipo,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white54,
+            style: TextStyle(
+              color: context.colorTextoSecundario,
               fontSize: 11,
             ),
           ),
@@ -736,24 +657,24 @@ class _GraficoBarrasRanking extends StatelessWidget {
     final double maximo = items.isEmpty
         ? 1
         : items
-            .map((e) => e.puntos)
-            .reduce((double a, double b) => a > b ? a : b);
+              .map((e) => e.puntos)
+              .reduce((double a, double b) => a > b ? a : b);
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF111111),
+        color: context.colorTarjeta,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: context.colorBorde),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
             titulo,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: context.colorTextoPrincipal,
               fontSize: 16,
               fontWeight: FontWeight.w800,
             ),
@@ -761,22 +682,23 @@ class _GraficoBarrasRanking extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             subtitulo,
-            style: const TextStyle(
-              color: Colors.white54,
+            style: TextStyle(
+              color: context.colorTextoSecundario,
               fontSize: 12,
             ),
           ),
           const SizedBox(height: 14),
           if (items.isEmpty)
-            const Text(
+            Text(
               'No hay datos suficientes para graficar.',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: context.colorTextoSecundario),
             )
           else
             Column(
               children: items.map((item) {
-                final double porcentaje =
-                    maximo == 0 ? 0 : (item.puntos / maximo).clamp(0.0, 1.0);
+                final double porcentaje = maximo == 0
+                    ? 0
+                    : (item.puntos / maximo).clamp(0.0, 1.0);
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
@@ -817,16 +739,16 @@ class _BarraRanking extends StatelessWidget {
                 nombre,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white70,
+                style: TextStyle(
+                  color: context.colorTextoSecundario,
                   fontSize: 12,
                 ),
               ),
             ),
             Text(
               valor.toStringAsFixed(valor % 1 == 0 ? 0 : 1),
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: context.colorTextoPrincipal,
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
               ),
@@ -839,9 +761,9 @@ class _BarraRanking extends StatelessWidget {
           child: LinearProgressIndicator(
             minHeight: 9,
             value: porcentaje,
-            backgroundColor: const Color(0xFF2A2A2A),
-            valueColor: const AlwaysStoppedAnimation<Color>(
-              Color(0xFFE60000),
+            backgroundColor: context.colorTarjetaSecundaria,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              context.colorPrimarioApp,
             ),
           ),
         ),
@@ -872,17 +794,17 @@ class _RankingPanel extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF111111),
+        color: context.colorTarjeta,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: context.colorBorde),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
             titulo,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: context.colorTextoPrincipal,
               fontSize: 16,
               fontWeight: FontWeight.w800,
             ),
@@ -890,8 +812,8 @@ class _RankingPanel extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             subtitulo,
-            style: const TextStyle(
-              color: Colors.white54,
+            style: TextStyle(
+              color: context.colorTextoSecundario,
               fontSize: 12,
             ),
           ),
@@ -936,11 +858,15 @@ class _FilaRanking extends StatelessWidget {
       padding: const EdgeInsets.all(11),
       decoration: BoxDecoration(
         color: posicion <= 3
-            ? const Color(0xFF241D10)
-            : const Color(0xFF1A1A1A),
+            ? context.esTemaOscuro
+                ? const Color(0xFF241D10)
+                : const Color(0xFFFFF5DB)
+            : context.colorTarjetaSecundaria,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: posicion <= 3 ? Colors.amber.withOpacity(0.35) : Colors.white10,
+          color: posicion <= 3
+              ? Colors.amber.withOpacity(0.45)
+              : context.colorBorde,
         ),
       ),
       child: Row(
@@ -950,7 +876,9 @@ class _FilaRanking extends StatelessWidget {
             child: Text(
               '#$posicion',
               style: TextStyle(
-                color: posicion == 1 ? Colors.amberAccent : Colors.white70,
+                color: posicion == 1
+                    ? Colors.amber
+                    : context.colorTextoSecundario,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -963,8 +891,8 @@ class _FilaRanking extends StatelessWidget {
                   item.nombre,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.colorTextoPrincipal,
                     fontWeight: FontWeight.w800,
                     fontSize: 13,
                   ),
@@ -974,8 +902,8 @@ class _FilaRanking extends StatelessWidget {
                   detalle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white54,
+                  style: TextStyle(
+                    color: context.colorTextoSecundario,
                     fontSize: 11,
                   ),
                 ),
@@ -985,8 +913,8 @@ class _FilaRanking extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             item.puntos.toStringAsFixed(item.puntos % 1 == 0 ? 0 : 1),
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: context.colorTextoPrincipal,
               fontWeight: FontWeight.w900,
               fontSize: 15,
             ),
@@ -998,80 +926,75 @@ class _FilaRanking extends StatelessWidget {
 }
 
 class _CabeceraTablaResultados extends StatelessWidget {
-  const _CabeceraTablaResultados({
-    required this.mostrarEstado,
-  });
+  const _CabeceraTablaResultados({required this.mostrarEstado});
 
   final bool mostrarEstado;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 10,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1C),
+        color: context.colorTarjetaSecundaria,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: context.colorBorde),
       ),
       child: Row(
         children: <Widget>[
-          const SizedBox(
+          SizedBox(
             width: 42,
             child: Text(
               'Pos',
               style: TextStyle(
-                color: Colors.white70,
+                color: context.colorTextoSecundario,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          const Expanded(
+          Expanded(
             flex: 3,
             child: Text(
               'Piloto',
               style: TextStyle(
-                color: Colors.white70,
+                color: context.colorTextoSecundario,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
           const SizedBox(width: 8),
-          const Expanded(
+          Expanded(
             flex: 2,
             child: Text(
               'Equipo',
               style: TextStyle(
-                color: Colors.white70,
+                color: context.colorTextoSecundario,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          const SizedBox(
+          SizedBox(
             width: 48,
             child: Text(
               'Pts',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white70,
+                color: context.colorTextoSecundario,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
           if (mostrarEstado)
-            const SizedBox(
+            SizedBox(
               width: 82,
               child: Text(
                 'Estado',
                 textAlign: TextAlign.right,
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: context.colorTextoSecundario,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1097,53 +1020,50 @@ class _FilaResultadoCarrera extends StatelessWidget {
       return Colors.redAccent;
     }
 
-    return Colors.greenAccent;
+    return Colors.green;
   }
 
-  Color _colorPosicion(int posicion) {
+  Color _colorPosicion(BuildContext context, int posicion) {
     if (posicion == 1) {
-      return Colors.amberAccent;
+      return Colors.amber;
     }
 
     if (posicion <= 3) {
-      return Colors.white;
+      return context.colorTextoPrincipal;
     }
 
     if (posicion <= 10) {
-      return Colors.greenAccent;
+      return Colors.green;
     }
 
-    return Colors.white70;
+    return context.colorTextoSecundario;
   }
 
   @override
   Widget build(BuildContext context) {
-    final int posicion = int.tryParse(
-          resultado['posicion']?.toString() ?? '',
-        ) ??
-        0;
+    final int posicion =
+        int.tryParse(resultado['posicion']?.toString() ?? '') ?? 0;
 
     final String piloto = resultado['piloto']?.toString() ?? '-';
     final String equipo = resultado['equipo']?.toString() ?? '-';
     final String estado = resultado['estado_final']?.toString() ?? '-';
 
-    final double puntos = double.tryParse(
-          resultado['puntos']?.toString() ?? '0',
-        ) ??
-        0.0;
+    final double puntos =
+        double.tryParse(resultado['puntos']?.toString() ?? '0') ?? 0.0;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 12,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
         color: posicion <= 3
-            ? const Color(0xFF241D10)
-            : const Color(0xFF1A1A1A),
+            ? context.esTemaOscuro
+                ? const Color(0xFF241D10)
+                : const Color(0xFFFFF5DB)
+            : context.colorTarjetaSecundaria,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: posicion <= 3 ? Colors.amber.withOpacity(0.35) : Colors.white10,
+          color: posicion <= 3
+              ? Colors.amber.withOpacity(0.45)
+              : context.colorBorde,
         ),
       ),
       child: Row(
@@ -1153,7 +1073,7 @@ class _FilaResultadoCarrera extends StatelessWidget {
             child: Text(
               posicion > 0 ? 'P$posicion' : '-',
               style: TextStyle(
-                color: _colorPosicion(posicion),
+                color: _colorPosicion(context, posicion),
                 fontWeight: FontWeight.w800,
                 fontSize: 13,
               ),
@@ -1165,8 +1085,8 @@ class _FilaResultadoCarrera extends StatelessWidget {
               piloto,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: context.colorTextoPrincipal,
                 fontWeight: FontWeight.w700,
                 fontSize: 13,
               ),
@@ -1179,8 +1099,8 @@ class _FilaResultadoCarrera extends StatelessWidget {
               equipo,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white70,
+              style: TextStyle(
+                color: context.colorTextoSecundario,
                 fontSize: 12,
               ),
             ),
@@ -1190,8 +1110,8 @@ class _FilaResultadoCarrera extends StatelessWidget {
             child: Text(
               puntos.toStringAsFixed(puntos % 1 == 0 ? 0 : 1),
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: context.colorTextoPrincipal,
                 fontWeight: FontWeight.w800,
                 fontSize: 13,
               ),
@@ -1227,22 +1147,19 @@ class _CargandoResultados extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: const Color(0xFF111111),
+        color: context.colorTarjeta,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: context.colorBorde),
       ),
-      child: const Center(
-        child: CircularProgressIndicator(color: Color(0xFFE60000)),
+      child: Center(
+        child: CircularProgressIndicator(color: context.colorPrimarioApp),
       ),
     );
   }
 }
 
 class _ErrorResultados extends StatelessWidget {
-  const _ErrorResultados({
-    required this.mensaje,
-    required this.onReintentar,
-  });
+  const _ErrorResultados({required this.mensaje, required this.onReintentar});
 
   final String mensaje;
   final VoidCallback onReintentar;
@@ -1253,28 +1170,24 @@ class _ErrorResultados extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFF111111),
+        color: context.colorTarjeta,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
       ),
       child: Column(
         children: <Widget>[
-          const Icon(
-            Icons.error_outline,
-            color: Colors.redAccent,
-            size: 32,
-          ),
+          const Icon(Icons.error_outline, color: Colors.redAccent, size: 32),
           const SizedBox(height: 10),
           Text(
             mensaje,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white70),
+            style: TextStyle(color: context.colorTextoSecundario),
           ),
           const SizedBox(height: 12),
           ElevatedButton(
             onPressed: onReintentar,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE60000),
+              backgroundColor: context.colorPrimarioApp,
               foregroundColor: Colors.white,
             ),
             child: const Text('Reintentar'),
@@ -1286,9 +1199,7 @@ class _ErrorResultados extends StatelessWidget {
 }
 
 class _SinResultados extends StatelessWidget {
-  const _SinResultados({
-    required this.onActualizar,
-  });
+  const _SinResultados({required this.onActualizar});
 
   final VoidCallback onActualizar;
 
@@ -1298,26 +1209,26 @@ class _SinResultados extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFF111111),
+        color: context.colorTarjeta,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: context.colorBorde),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text(
+          Text(
             'Aún no hay resultados',
             style: TextStyle(
-              color: Colors.white,
+              color: context.colorTextoPrincipal,
               fontSize: 16,
               fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Simulá una carrera desde Inicio para generar métricas, rankings y gráficos.',
             style: TextStyle(
-              color: Colors.white70,
+              color: context.colorTextoSecundario,
               fontSize: 13,
             ),
           ),
@@ -1327,8 +1238,8 @@ class _SinResultados extends StatelessWidget {
             icon: const Icon(Icons.refresh),
             label: const Text('Actualizar'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.white,
-              side: const BorderSide(color: Colors.white24),
+              foregroundColor: context.colorTextoPrincipal,
+              side: BorderSide(color: context.colorBorde),
             ),
           ),
         ],
@@ -1341,22 +1252,16 @@ class _MetricasResultados {
   const _MetricasResultados({
     required this.rankingPilotos,
     required this.rankingEquipos,
-    required this.totalAbandonos,
-    required this.totalFinalizados,
     required this.totalPuntos,
   });
 
   final List<_RankingItem> rankingPilotos;
   final List<_RankingItem> rankingEquipos;
-  final int totalAbandonos;
-  final int totalFinalizados;
   final double totalPuntos;
 }
 
 class _AcumuladoRanking {
-  _AcumuladoRanking({
-    required this.nombre,
-  });
+  _AcumuladoRanking({required this.nombre});
 
   final String nombre;
 

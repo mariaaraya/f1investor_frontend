@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../dominio/entidades/entidades.dart';
+import '../../../../infraestructura/extenciones/contexto_extensiones.dart';
 import '../../principal/principal_vista.dart';
 import '../registro/registro_vista.dart';
 import 'cubit/inicio_sesion_cubit.dart';
@@ -31,7 +32,7 @@ class InicioSesionVista extends StatelessWidget {
             titulo: 'No se pudo iniciar sesión',
             mensaje: state.mensajeError!,
             icono: Icons.error_outline,
-            colorIcono: const Color(0xFFE60000),
+            colorIcono: context.colorPrimarioApp,
           );
         }
       },
@@ -50,7 +51,7 @@ class _ContenidoInicioSesion extends StatelessWidget {
     final InicioSesionState state = context.watch<InicioSesionCubit>().state;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080808),
+      backgroundColor: context.colorFondo,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -64,11 +65,11 @@ class _ContenidoInicioSesion extends StatelessWidget {
                   const SizedBox(height: 70),
                   const _LogoInicioSesion(),
                   const SizedBox(height: 28),
-                  const Text(
+                  Text(
                     'F1 Investor',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: context.colorTextoPrincipal,
                       fontSize: 36,
                       fontWeight: FontWeight.w800,
                     ),
@@ -78,18 +79,14 @@ class _ContenidoInicioSesion extends StatelessWidget {
                     etiqueta: 'Correo electrónico',
                     hint: 'correo@ejemplo.com',
                     tipoTeclado: TextInputType.emailAddress,
-                    onChanged: context
-                        .read<InicioSesionCubit>()
-                        .actualizarCorreo,
+                    onChanged: context.read<InicioSesionCubit>().actualizarCorreo,
                   ),
                   const SizedBox(height: 26),
                   _CampoInicioSesion(
                     etiqueta: 'Contraseña',
                     hint: '••••••••',
                     obscureText: true,
-                    onChanged: context
-                        .read<InicioSesionCubit>()
-                        .actualizarPassword,
+                    onChanged: context.read<InicioSesionCubit>().actualizarPassword,
                   ),
                   const SizedBox(height: 36),
                   SizedBox(
@@ -99,10 +96,9 @@ class _ContenidoInicioSesion extends StatelessWidget {
                           ? context.read<InicioSesionCubit>().iniciarSesion
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFE60000),
-                        disabledBackgroundColor: const Color(
-                          0xFFE60000,
-                        ).withOpacity(0.60),
+                        backgroundColor: context.colorPrimarioApp,
+                        disabledBackgroundColor:
+                            context.colorPrimarioApp.withOpacity(0.60),
                         foregroundColor: Colors.white,
                         disabledForegroundColor: Colors.white70,
                         shape: RoundedRectangleBorder(
@@ -135,9 +131,12 @@ class _ContenidoInicioSesion extends StatelessWidget {
                         : () {
                             context.goNamed(RecuperarPasswordVista.nombre);
                           },
-                    child: const Text(
+                    child: Text(
                       '¿Olvidaste tu contraseña?',
-                      style: TextStyle(color: Colors.white, fontSize: 15),
+                      style: TextStyle(
+                        color: context.colorTextoPrincipal,
+                        fontSize: 15,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 28),
@@ -147,10 +146,10 @@ class _ContenidoInicioSesion extends StatelessWidget {
                         : () {
                             context.goNamed(RegistroVista.nombre);
                           },
-                    child: const Text(
+                    child: Text(
                       'Crear cuenta',
                       style: TextStyle(
-                        color: Color(0xFFE60000),
+                        color: context.colorPrimarioApp,
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                       ),
@@ -177,18 +176,17 @@ class _LogoInicioSesion extends StatelessWidget {
         'assets/imagenes/f1_logo.png',
         height: 46,
         fit: BoxFit.contain,
-        errorBuilder:
-            (BuildContext context, Object error, StackTrace? stackTrace) {
-              return const Text(
-                'F1',
-                style: TextStyle(
-                  color: Color(0xFFE60000),
-                  fontSize: 38,
-                  fontWeight: FontWeight.w900,
-                  fontStyle: FontStyle.italic,
-                ),
-              );
-            },
+        errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+          return Text(
+            'F1',
+            style: TextStyle(
+              color: context.colorPrimarioApp,
+              fontSize: 38,
+              fontWeight: FontWeight.w900,
+              fontStyle: FontStyle.italic,
+            ),
+          );
+        },
       ),
     );
   }
@@ -231,8 +229,8 @@ class _CampoInicioSesionState extends State<_CampoInicioSesion> {
       children: <Widget>[
         Text(
           widget.etiqueta,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: context.colorTextoPrincipal,
             fontSize: 13,
             fontWeight: FontWeight.w700,
           ),
@@ -242,13 +240,19 @@ class _CampoInicioSesionState extends State<_CampoInicioSesion> {
           onChanged: widget.onChanged,
           obscureText: ocultarTexto,
           keyboardType: widget.tipoTeclado,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
-          cursorColor: const Color(0xFFE60000),
+          style: TextStyle(
+            color: context.colorTextoPrincipal,
+            fontSize: 14,
+          ),
+          cursorColor: context.colorPrimarioApp,
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 14),
+            hintStyle: TextStyle(
+              color: context.colorHint,
+              fontSize: 14,
+            ),
             filled: true,
-            fillColor: const Color(0xFF1C1C1C),
+            fillColor: context.colorCampo,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 15,
@@ -260,18 +264,18 @@ class _CampoInicioSesionState extends State<_CampoInicioSesion> {
                       _mostrarTexto
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
-                      color: Colors.white70,
+                      color: context.colorTextoSecundario,
                     ),
                   )
                 : null,
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(7),
-              borderSide: const BorderSide(color: Color(0xFF333333)),
+              borderSide: BorderSide(color: context.colorBorde),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(7),
-              borderSide: const BorderSide(
-                color: Color(0xFFE60000),
+              borderSide: BorderSide(
+                color: context.colorPrimarioApp,
                 width: 1.2,
               ),
             ),
